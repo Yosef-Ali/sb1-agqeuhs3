@@ -20,6 +20,7 @@ interface DataTableToolbarProps<TData> {
 export function ProductsTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
+  const [showAddProduct, setShowAddProduct] = useState(false)
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
@@ -58,7 +59,19 @@ export function ProductsTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <div className="flex items-center space-x-2">
+        <Button
+          variant="outline"
+          size="sm"
+          className="h-8"
+          onClick={() => setShowAddProduct(true)}
+        >
+          <PlusIcon className="h-4 w-4" />
+          <span className="ml-2">Add Product</span>
+        </Button>
+        <DataTableViewOptions table={table} />
+      </div>
+      <ProductForm open={showAddProduct} onClose={() => setShowAddProduct(false)} />
     </div>
   )
 }

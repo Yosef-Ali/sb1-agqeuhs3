@@ -2,7 +2,14 @@
 
 import { useState } from "react"
 import { Badge } from "@/components/ui/badge"
-import { ArrowUpDown } from "lucide-react"
+import { ArrowUpDown, MoreHorizontal, PlusIcon } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -73,7 +80,54 @@ const data: Product[] = [
     stock: 0,
     status: "out-of-stock",
   },
+  {
+    id: "actions",
+    cell: ({ row }) => {
+      const product = row.original
+
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => handleEdit(product)}>
+              Edit
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleDelete(product)}
+              className="text-red-600"
+            >
+              Delete
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )
+    },
+  },
 ]
+
+export function ProductsTable() {
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
+  const [showEditProduct, setShowEditProduct] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+
+  const handleEdit = (product: Product) => {
+    setSelectedProduct(product)
+    setShowEditProduct(true)
+  }
+
+  const handleDelete = async (product: Product) => {
+    // TODO: Implement delete logic
+    console.log("Delete product:", product)
+  }
 
 export const columns: ColumnDef<Product>[] = [
   {
@@ -226,6 +280,16 @@ export function ProductsTable() {
         </Table>
       </div>
       <OrdersTablePagination table={table} />
+      {selectedProduct && (
+        <ProductForm
+          open={showEditProduct}
+          onClose={() => {
+            setShowEditProduct(false)
+            setSelectedProduct(null)
+          }}
+          product={selectedProduct}
+        />
+      )}
     </div>
   )
 }
