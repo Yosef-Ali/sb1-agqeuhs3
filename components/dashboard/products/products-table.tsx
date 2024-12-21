@@ -46,13 +46,13 @@ type Product = {
 const getStatusColor = (status: string) => {
   switch (status) {
     case "in-stock":
-      return "success" as const
+      return "default"
     case "low-stock":
-      return "warning" as const
+      return "outline"
     case "out-of-stock":
-      return "destructive" as const
+      return "destructive"
     default:
-      return "secondary" as const
+      return "secondary"
   }
 }
 
@@ -235,9 +235,9 @@ export function ProductsTable() {
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                     </TableHead>
                   )
                 })}
