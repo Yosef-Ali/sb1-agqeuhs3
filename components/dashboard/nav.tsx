@@ -36,9 +36,14 @@ export function DashboardNav({ user }: DashboardNavProps) {
           </nav>
         </div>
         <div className="ml-auto flex items-center space-x-4">
-          <Button variant="ghost" size="sm">
+          <p className="text-sm text-muted-foreground">
             {user?.email}
-          </Button>
+          </p>
+          <form action="/auth/signout" method="post">
+            <Button variant="ghost" size="sm">
+              Sign out
+            </Button>
+          </form>
         </div>
       </div>
     </header>
