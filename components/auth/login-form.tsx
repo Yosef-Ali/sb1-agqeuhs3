@@ -5,9 +5,12 @@ import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
+import { Label } from '@/components/ui/label'
+import { Icons } from '@/components/icons'
 
 export function LoginForm() {
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
 
@@ -18,11 +21,9 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await supabase.auth.signInWithPassword({
         email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
-        },
+        password,
       })
 
       if (error) {
@@ -30,13 +31,13 @@ export function LoginForm() {
       }
 
       toast({
-        title: 'Check your email',
-        description: 'We sent you a login link. Be sure to check your spam too.',
+        title: 'Success',
+        description: 'You have successfully signed in.',
       })
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Something went wrong. Please try again.',
+        description: 'Invalid email or password.',
         variant: 'destructive',
       })
     } finally {
@@ -45,17 +46,42 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col space-y-4">
-      <Input
-        type="email"
-        placeholder="name@example.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-      />
-      <Button type="submit" disabled={isLoading}>
-        {isLoading ? 'Sending link...' : 'Send magic link'}
-      </Button>
-    </form>
+    <div className="grid gap-6">
+      <form onSubmit={onSubmit}>
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+              disabled={isLoading}
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password">Password</Label>
+            <Input
+              id="password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              autoComplete="current-password"
+              disabled={isLoading}
+            />
+          </div>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && (
+              <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
+            )}
+            Sign In
+          </Button>
+        </div>
+      </form>
+    </div>
   )
 }
