@@ -20,6 +20,10 @@ interface DataTableViewOptionsProps<TData> {
 export function DataTableViewOptions<TData>({
   table,
 }: DataTableViewOptionsProps<TData>) {
+  if (!table) return null
+
+  const columns = table.getAllColumns()
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -35,8 +39,7 @@ export function DataTableViewOptions<TData>({
       <DropdownMenuContent align="end" className="w-[150px]">
         <DropdownMenuLabel>Toggle columns</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {table
-          .getAllColumns()
+        {columns
           .filter(
             (column) =>
               typeof column.accessorFn !== "undefined" && column.getCanHide()
