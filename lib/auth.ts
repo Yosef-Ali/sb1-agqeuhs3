@@ -1,4 +1,4 @@
-import { createServerClient, type CookieOptions } from '@supabase/auth-helpers-nextjs'
+import { createServerComponentClient, type CookieOptions } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -11,9 +11,7 @@ if (!supabaseUrl || !supabaseKey) {
 export async function auth() {
   const cookieStore = cookies()
   
-  const supabase = createServerClient(
-    supabaseUrl,
-    supabaseKey,
+  const supabase = createServerComponentClient(
     {
       cookies: {
         get(name: string) {
