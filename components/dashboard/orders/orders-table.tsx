@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { Badge } from "@/components/ui/badge"
+import { ArrowUpDown } from "lucide-react"
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -25,6 +27,21 @@ import { Button } from "@/components/ui/button"
 import { OrdersTablePagination } from "./orders-pagination"
 
 // Example data - replace with your actual data structure
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "pending":
+      return "warning" as const
+    case "processing":
+      return "default" as const
+    case "completed":
+      return "success" as const
+    case "cancelled":
+      return "destructive" as const
+    default:
+      return "secondary" as const
+  }
+}
+
 type Order = {
   id: string
   customer: string
@@ -54,7 +71,17 @@ const data: Order[] = [
 export const columns: ColumnDef<Order>[] = [
   {
     accessorKey: "id",
-    header: "Order ID",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Order ID
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
   },
   {
     accessorKey: "customer",
@@ -62,7 +89,25 @@ export const columns: ColumnDef<Order>[] = [
   },
   {
     accessorKey: "status",
-    header: "Status",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Status
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    cell: ({ row }) => {
+      const status = row.getValue("status") as string
+      return (
+        <Badge variant={getStatusColor(status)}>
+          {status.charAt(0).toUpperCase() + status.slice(1)}
+        </Badge>
+      )
+    },
   },
   {
     accessorKey: "total",
