@@ -39,13 +39,38 @@ export function ProductForm({ open, onClose, product }: ProductFormProps) {
     category: product?.category || "",
     price: product?.price || 0,
     stock: product?.stock || 0,
-    image: product?.image || "",
   })
+  const [imageFile, setImageFile] = useState<File | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: Implement product creation/update logic
-    onClose()
+    
+    try {
+      if (imageFile) {
+        const formData = new FormData()
+        formData.append('file', imageFile)
+        
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+
+        if (!response.ok) {
+          throw new Error('Failed to upload image')
+        }
+
+        const { url } = await response.json()
+        // TODO: Save product with image URL
+        console.log('Image uploaded:', url)
+      }
+      
+      // TODO: Save other product data
+      console.log('Product data:', formData)
+      
+      onClose()
+    } catch (error) {
+      console.error('Error saving product:', error)
+    }
   }
 
   return (
@@ -63,8 +88,7 @@ export function ProductForm({ open, onClose, product }: ProductFormProps) {
           <div className="space-y-2">
             <Label htmlFor="image">Product Image</Label>
             <ImageUpload
-              value={formData.image}
-              onChange={(url) => setFormData({ ...formData, image: url })}
+              onChange={setImageFile}
               disabled={false}
             />
           </div>
