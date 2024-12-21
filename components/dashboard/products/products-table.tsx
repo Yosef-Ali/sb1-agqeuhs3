@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import {
@@ -36,6 +37,7 @@ import { ProductForm } from "./product-form"
 
 type Product = {
   id: string
+  image: string
   name: string
   category: string
   price: number
@@ -59,6 +61,7 @@ const getStatusColor = (status: string) => {
 const data: Product[] = [
   {
     id: "PROD001",
+    image: "/images/products/apples.jpg",
     name: "Organic Apples",
     category: "Fruits",
     price: 4.99,
@@ -67,6 +70,7 @@ const data: Product[] = [
   },
   {
     id: "PROD002",
+    image: "/images/products/bananas.jpg",
     name: "Organic Bananas",
     category: "Fruits",
     price: 3.99,
@@ -75,6 +79,7 @@ const data: Product[] = [
   },
   {
     id: "PROD003",
+    image: "/images/products/oranges.jpg",
     name: "Organic Oranges",
     category: "Fruits",
     price: 5.99,
@@ -92,6 +97,24 @@ export function ProductsTable() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
   const columns: ColumnDef<Product>[] = [
+    {
+      accessorKey: "image",
+      header: "Image",
+      cell: ({ row }) => {
+        return (
+          <div className="flex items-center gap-2">
+            <div className="relative h-10 w-10">
+              <Image
+                src={row.getValue("image") || "/placeholder.jpg"}
+                alt={row.getValue("name")}
+                className="object-cover rounded-md"
+                fill
+              />
+            </div>
+          </div>
+        )
+      },
+    },
     {
       accessorKey: "id",
       header: ({ column }) => {

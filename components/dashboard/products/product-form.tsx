@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { ImageUpload } from "@/components/ui/image-upload"
 import {
   Sheet,
   SheetContent,
@@ -38,6 +39,7 @@ export function ProductForm({ open, onClose, product }: ProductFormProps) {
     category: product?.category || "",
     price: product?.price || 0,
     stock: product?.stock || 0,
+    image: product?.image || "",
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,6 +60,14 @@ export function ProductForm({ open, onClose, product }: ProductFormProps) {
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
+          <div className="space-y-2">
+            <Label htmlFor="image">Product Image</Label>
+            <ImageUpload
+              value={formData.image}
+              onChange={(url) => setFormData({ ...formData, image: url })}
+              disabled={false}
+            />
+          </div>
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
             <Input
