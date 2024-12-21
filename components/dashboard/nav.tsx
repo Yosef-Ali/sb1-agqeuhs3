@@ -1,9 +1,9 @@
 import Link from "next/link"
-import { User } from "next-auth"
+import { User } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 
 interface DashboardNavProps {
-  user: User
+  user: User | null
 }
 
 export function DashboardNav({ user }: DashboardNavProps) {
