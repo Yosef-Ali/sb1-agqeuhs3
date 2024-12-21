@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Cross2Icon, PlusIcon } from "@radix-ui/react-icons"
 import { Table } from "@tanstack/react-table"
+import { ProductForm } from "./product-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
