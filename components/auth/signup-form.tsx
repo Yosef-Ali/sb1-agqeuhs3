@@ -10,13 +10,12 @@ import { Icons } from '@/components/icons'
 import { Separator } from '@/components/ui/separator'
 import Link from 'next/link'
 
-export function LoginForm() {
+export function SignUpForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const { toast } = useToast()
-
   const supabase = createClientComponentClient()
 
   async function onSubmit(e: React.FormEvent) {
@@ -24,9 +23,12 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${location.origin}/auth/callback`,
+        },
       })
 
       if (error) {
@@ -34,13 +36,13 @@ export function LoginForm() {
       }
 
       toast({
-        title: 'Success',
-        description: 'You have successfully signed in.',
+        title: 'Check your email',
+        description: 'We sent you a confirmation link.',
       })
     } catch (error) {
       toast({
         title: 'Error',
-        description: 'Invalid email or password.',
+        description: 'Something went wrong. Please try again.',
         variant: 'destructive',
       })
     } finally {
@@ -94,7 +96,7 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              autoComplete="current-password"
+              autoComplete="new-password"
               disabled={isLoading}
             />
           </div>
@@ -102,7 +104,7 @@ export function LoginForm() {
             {isLoading && (
               <Icons.spinner className="mr-2 h-4 w-4 animate-spin" />
             )}
-            Sign In
+            Sign Up
           </Button>
         </div>
       </form>
@@ -146,9 +148,9 @@ export function LoginForm() {
         Google
       </Button>
       <p className="text-center text-sm text-muted-foreground">
-        Don't have an account?{' '}
-        <Link href="/signup" className="underline underline-offset-4 hover:text-primary">
-          Sign up
+        Already have an account?{' '}
+        <Link href="/login" className="underline underline-offset-4 hover:text-primary">
+          Sign in
         </Link>
       </p>
     </div>
