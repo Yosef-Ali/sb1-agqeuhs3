@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import { v4 as uuidv4 } from 'uuid'
+import { supabase } from "@/lib/supabase/client"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ImageUpload } from "@/components/ui/image-upload"
@@ -60,39 +62,60 @@ export function ProductForm({
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
+  setIsLoading(true)
   
   try {
-    let productData = { ...formData };
+    let imageUrl = formData.imageUrl;
     
     if (imageFile) {
-      const formData = new FormData()
-      formData.append('file', imageFile)
-      
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData
-      })
+      const fileExt = imageFile.name.split('.').pop()
+      const fileName = `${uuidv4()}.${fileExt}`
+      const filePath = `${fileName}`
 
-      if (!response.ok) {
-        throw new Error('Failed to upload image')
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, imageFile)
+
+      if (uploadError) {
+        throw uploadError
       }
 
-      const { url } = await response.json()
-      productData = {
-        ...productData,
-        imageUrl: url
-      }
-      console.log('Product data with image:', productData)
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath)
+
+      imageUrl = publicUrl
     }
-    
-    console.log('Product data:', productData)
-    
-    // Save product data here
-    // ...
+
+    const productData = {
+      ...formData,
+      image_url: imageUrl,
+      updated_at: new Date().toISOString()
+    }
+
+    if (product?.id) {
+      // Update existing product
+      const { error } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', product.id)
+
+      if (error) throw error
+    } else {
+      // Create new product
+      const { error } = await supabase
+        .from('products')
+        .insert([productData])
+
+      if (error) throw error
+    }
 
     onClose()
   } catch (error) {
     console.error('Error saving product:', error)
+    onError(error instanceof Error ? error.message : 'Failed to save product')
+  } finally {
+    setIsLoading(false)
   }
 }
 
