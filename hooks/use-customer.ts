@@ -17,7 +17,7 @@ export function useCustomer() {
         const { data, error } = await supabase
           .from('customers')
           .select('*')
-          .eq('id', user.id)
+          .eq('email', user.email)
           .single()
 
         if (error) throw error

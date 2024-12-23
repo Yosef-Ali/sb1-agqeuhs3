@@ -58,14 +58,14 @@ export function CustomersTable() {
       const { data, error } = await supabase
         .from("customers")
         .select("*")
-        .order('created_at', { ascending: false })
+        .order('createdAt', { ascending: false })
 
       if (error) throw error
       
       // Map the data to match the table structure
       const formattedData = data?.map(customer => ({
         id: customer.id,
-        name: customer.full_name,
+        name: customer.fullName,
         email: customer.email,
         phone: customer.phone,
         created_at: customer.created_at

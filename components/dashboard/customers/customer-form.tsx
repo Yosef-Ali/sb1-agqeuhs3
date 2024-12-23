@@ -33,11 +33,11 @@ export function CustomerForm({
   onError,
 }: CustomerFormProps) {
   const [formData, setFormData] = useState<{
-    full_name: string;
+    fullName: string;
     email: string;
     phone: string;
   }>(customer ? {
-    full_name: customer.full_name || "",
+    fullName: customer.fullName || "",
     email: customer.email || "",
     phone: customer.phone || "",
   } : {
@@ -98,9 +98,9 @@ export function CustomerForm({
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
-                value={formData.full_name ?? ""}
+                value={formData.fullName ?? ""}
                 onChange={(e) =>
-                  setFormData({ ...formData, full_name: e.target.value })
+                  setFormData({ ...formData, fullName: e.target.value })
                 }
                 placeholder="Enter customer name"
                 disabled={isLoading}
