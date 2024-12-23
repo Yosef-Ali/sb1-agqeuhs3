@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select"
 
 import { Product } from "@/types/product"
+import { Button } from "@/components/ui/button"
 
 interface ProductFormProps {
   open: boolean
@@ -100,7 +101,7 @@ export function ProductForm({
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    
+
     if (setIsLoading) setIsLoading(true)
 
     try {
@@ -230,15 +231,15 @@ export function ProductForm({
             <Label>Product Image</Label>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <ImageUpload 
+                <ImageUpload
                   onChange={(file) => setImageFile(file)}
                 />
               </div>
               {imageUrl && (
                 <div className="flex items-center justify-center">
-                  <img 
-                    src={imageUrl} 
-                    alt="Existing product image" 
+                  <img
+                    src={imageUrl}
+                    alt="Existing product image"
                     className="max-w-[200px] max-h-[200px] object-cover rounded-md"
                   />
                 </div>
@@ -247,15 +248,15 @@ export function ProductForm({
           </div>
 
           <div className="flex justify-end space-x-4 pt-4">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="ghost"
               onClick={onClose}
               type="button"
             >
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isLoading}
             >
               {isLoading ? "Saving..." : (product ? "Update Product" : "Add Product")}
