@@ -33,7 +33,7 @@ export default async function CustomersPage() {
         </Button>
       </DashboardHeader>
       <Suspense fallback={<div>Loading...</div>}>
-        <CustomersTable data={customers || []} />
+        <CustomersTable customers={customers || []} />
       </Suspense>
     </DashboardShell>
   )

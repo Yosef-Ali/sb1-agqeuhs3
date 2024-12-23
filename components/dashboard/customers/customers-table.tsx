@@ -1,24 +1,43 @@
-"use client"
-
-import { useState } from "react"
 import { Customer } from "@/lib/supabase/types"
-import { DataTable } from "@/components/ui/data-table"
-
-import { columns } from "./columns"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { format } from "date-fns"
 
 interface CustomersTableProps {
-  data: Customer[]
+  customers: Customer[]
 }
 
-export function CustomersTable({ data }: CustomersTableProps) {
-  const [rowSelection, setRowSelection] = useState({})
-
+export function CustomersTable({ customers }: CustomersTableProps) {
   return (
-    <DataTable
-      columns={columns}
-      data={data}
-      rowSelection={rowSelection}
-      setRowSelection={setRowSelection}
-    />
+    <div className="rounded-md border">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Name</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Phone</TableHead>
+            <TableHead>Created</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {customers.map((customer) => (
+            <TableRow key={customer.id}>
+              <TableCell className="font-medium">{customer.name}</TableCell>
+              <TableCell>{customer.email}</TableCell>
+              <TableCell>{customer.phone}</TableCell>
+              <TableCell>
+                {format(new Date(customer.created_at), "MMM d, yyyy")}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   )
 }
