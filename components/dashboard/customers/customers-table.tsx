@@ -66,7 +66,7 @@ export function CustomersTable() {
       const mappedCustomers: Customer[] = (data || []).map(customer => ({
         id: customer.id,
         full_name: customer.full_name,
-        email: customer.email,
+        email: customer.email || '', // Ensure email is always present
         address: customer.address || null,
         phone: customer.phone || null,
         created_at: customer.created_at,
