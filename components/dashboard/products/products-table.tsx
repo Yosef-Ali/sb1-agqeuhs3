@@ -81,41 +81,28 @@ export function ProductsTable() {
     }
   }
 
-  useEffect(() => {
-    let mounted = true;
-    
-    const loadProducts = async () => {
-      if (!mounted) return;
+  const fetchProducts = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order('created_at', { ascending: false });
       
-      try {
-        setIsLoading(true);
-        setError(null);
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .order('created_at', { ascending: false });
-          
-        if (!mounted) return;
-        
-        if (error) throw error;
-        setProducts(data || []);
-      } catch (err) {
-        if (!mounted) return;
-        console.error("Error fetching products:", err);
-        setError(err instanceof Error ? err.message : "Failed to fetch products");
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
-        }
-      }
-    };
+      if (error) throw error;
+      setProducts(data || []);
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError(err instanceof Error ? err.message : "Failed to fetch products");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-    loadProducts();
-    
-    return () => {
-      mounted = false;
-    };
-  }, []) // Empty dependency array since we only want to load once
+  useEffect(() => {
+    fetchProducts();
+  }, [fetchProducts]);
 
   const columns: ColumnDef<Product>[] = [
     {
@@ -345,8 +332,13 @@ export function ProductsTable() {
 
       <div className="rounded-md border relative min-h-[400px]">
         {isLoading ? (
-          <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          <div className="w-full space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12" />
+                <Skeleton className="h-12 w-[80%]" />
+              </div>
+            ))}
           </div>
         ) : error ? (
           <div className="absolute inset-0 flex items-center justify-center text-red-500">
