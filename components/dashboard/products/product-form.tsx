@@ -60,7 +60,7 @@ export function ProductForm({
     category: product?.category || "",
     price: product?.price || 0,
     stock: product?.stock || 0,
-    image_url: product?.image || "",
+    image_url: product?.imagUrl || "",
     status: product?.status || "in-stock"
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
