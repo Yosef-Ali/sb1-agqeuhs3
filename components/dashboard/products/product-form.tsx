@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { v4 as uuidv4 } from 'uuid'
 import { supabase } from "@/lib/supabase/client"
+import { useToast } from "@/hooks/use-toast"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ImageUpload } from "@/components/ui/image-upload"
@@ -39,6 +40,7 @@ export interface ProductFormProps {
 }
 
 export function ProductForm({
+  const { toast } = useToast()
   open,
   onClose,
   isLoading = false,
@@ -131,7 +133,13 @@ const handleSubmit = async (e: React.FormEvent) => {
     window.location.reload()
   } catch (error) {
     console.error('Error saving product:', error)
-    onError(error instanceof Error ? error.message : 'Failed to save product')
+    const errorMessage = error instanceof Error ? error.message : 'Failed to save product'
+    toast({
+      title: "Error",
+      description: errorMessage,
+      variant: "destructive",
+    })
+    onError(errorMessage)
   } finally {
     setIsLoading(false)
   }
