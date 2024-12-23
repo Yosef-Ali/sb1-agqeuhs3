@@ -33,11 +33,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { OrdersTablePagination } from "../orders/orders-pagination"
 import { DeleteConfirmation } from "@/components/ui/delete-confirmation"
+import { CustomerForm } from "./customer-form"
 import { supabase } from "@/lib/supabase/client"
 import { Skeleton } from "@/components/ui/skeleton"
 import { format } from "date-fns"
 
 export function CustomersTable() {
+  const [showEditCustomer, setShowEditCustomer] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -127,6 +130,12 @@ export function CustomersTable() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem
+                onClick={() => handleEdit(customer)}
+                disabled={isSubmitting}
+              >
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
                 onClick={() => handleDelete(customer)}
                 className="text-red-600"
                 disabled={isSubmitting}
@@ -139,6 +148,17 @@ export function CustomersTable() {
       },
     },
   ]
+
+  const handleEdit = async (customer: Customer) => {
+    setSelectedCustomer(customer)
+    setShowEditCustomer(true)
+  }
+
+  const handleFormClose = async () => {
+    setShowEditCustomer(false)
+    setSelectedCustomer(null)
+    await fetchCustomers() // Refresh the list
+  }
 
   const handleDelete = (customer: Customer) => {
     setDeleteCustomer(customer)
@@ -271,6 +291,15 @@ export function CustomersTable() {
         )}
       </div>
       <OrdersTablePagination table={table} />
+      {showEditCustomer && (
+        <CustomerForm
+          open={showEditCustomer}
+          onClose={handleFormClose}
+          customer={selectedCustomer}
+          isLoading={isSubmitting}
+          setIsLoading={setIsSubmitting}
+        />
+      )}
       <DeleteConfirmation
         open={!!deleteCustomer}
         onClose={() => setDeleteCustomer(null)}
