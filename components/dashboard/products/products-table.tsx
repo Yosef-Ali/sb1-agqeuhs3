@@ -82,8 +82,40 @@ export function ProductsTable() {
   }
 
   useEffect(() => {
-    fetchProducts()
-  }, [])
+    let mounted = true;
+    
+    const loadProducts = async () => {
+      if (!mounted) return;
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order('created_at', { ascending: false });
+          
+        if (!mounted) return;
+        
+        if (error) throw error;
+        setProducts(data || []);
+      } catch (err) {
+        if (!mounted) return;
+        console.error("Error fetching products:", err);
+        setError(err instanceof Error ? err.message : "Failed to fetch products");
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    loadProducts();
+    
+    return () => {
+      mounted = false;
+    };
+  }, []) // Empty dependency array since we only want to load once
 
   const columns: ColumnDef<Product>[] = [
     {
@@ -311,12 +343,20 @@ export function ProductsTable() {
         </div>
       )}
 
-      <div className="rounded-md border relative">
-        {isLoading && (
+      <div className="rounded-md border relative min-h-[400px]">
+        {isLoading ? (
           <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
           </div>
-        )}
+        ) : error ? (
+          <div className="absolute inset-0 flex items-center justify-center text-red-500">
+            {error}
+          </div>
+        ) : products.length === 0 ? (
+          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
+            No products found
+          </div>
+        ) : (
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
