@@ -94,7 +94,14 @@ const handleSubmit = async (e: React.FormEvent) => {
 
         if (uploadError) {
           console.error('Storage upload error:', uploadError)
-          throw new Error(`Upload failed: ${uploadError.message}`)
+          // Check for specific storage permission errors
+          if (uploadError.message.includes('storage/object-not-found') || 
+              uploadError.message.includes('storage/unauthorized') ||
+              uploadError.message.includes('permission')) {
+            throw new Error('Unable to upload image due to permission settings. Please contact support.')
+          }
+          // For other storage errors
+          throw new Error(`Image upload failed. Please try again or use a different image.`)
         }
 
         // Get the public URL
@@ -109,12 +116,24 @@ const handleSubmit = async (e: React.FormEvent) => {
         finalImageUrl = publicUrl
       } catch (error) {
         console.error('Image upload error:', error)
+        const errorMessage = error instanceof Error ? error.message : 'Failed to upload image'
         toast({
           title: "Image Upload Failed",
-          description: error instanceof Error ? error.message : 'Failed to upload image',
+          description: errorMessage,
           variant: "destructive",
         })
-        throw error
+        
+        // Log additional details for debugging
+        if (error instanceof Error) {
+          console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            stack: error.stack
+          })
+        }
+        
+        // Don't throw the error, just return to prevent form submission
+        return
       }
     }
 
