@@ -66,20 +66,6 @@ export function ProductsTable() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null)
 
-  const fetchProducts = async () => {
-    try {
-      setIsLoading(true)
-      setError(null)
-      const { data, error } = await supabase.from("products").select("*")
-      if (error) throw error
-      setProducts(data || [])
-    } catch (err) {
-      console.error("Error fetching products:", err)
-      setError(err instanceof Error ? err.message : "Failed to fetch products")
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const fetchProducts = useCallback(async () => {
     try {
