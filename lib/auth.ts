@@ -17,7 +17,7 @@ export async function auth() {
 export async function requireAuth() {
   const session = await auth()
   if (!session) {
-    throw new Error('Authentication required')
+    redirect('/login')
   }
   return session
 }
