@@ -38,7 +38,7 @@ import { supabase } from "@/lib/supabase/client"
 import { v4 as uuidv4 } from 'uuid'
 
 type Product = {
-  id: stringproduc
+  id: string
   image: string
   name: string
   category: string

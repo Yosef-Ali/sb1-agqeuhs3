@@ -119,16 +119,6 @@ const handleSubmit = async (e: React.FormEvent) => {
   }
 }
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      setIsLoading(true)
-      // ...existing form submission code...
-    } catch (error) {
-      onError(error instanceof Error ? error.message : 'Something went wrong')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
