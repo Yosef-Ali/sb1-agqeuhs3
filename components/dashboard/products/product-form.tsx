@@ -114,8 +114,11 @@ const handleSubmit = async (e: React.FormEvent) => {
       if (error) throw error
     }
 
-    // Refresh the products list
-    window.location.reload()
+    toast({
+      title: "Success",
+      description: product?.id ? "Product updated successfully" : "Product created successfully",
+    })
+    onClose()
   } catch (error) {
     console.error('Error saving product:', error)
     const errorMessage = error instanceof Error ? error.message : 'Failed to save product'

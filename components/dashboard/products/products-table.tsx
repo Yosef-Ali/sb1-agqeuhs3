@@ -225,6 +225,12 @@ export function ProductsTable() {
     setShowEditProduct(true)
   }
 
+  const handleFormClose = async () => {
+    setShowEditProduct(false)
+    setSelectedProduct(null)
+    await fetchProducts() // Refresh the products list
+  }
+
   const uploadImage = async (file: File): Promise<string> => {
     try {
       const fileExt = file.name.split('.').pop()
@@ -354,13 +360,10 @@ export function ProductsTable() {
         </Table>
       </div>
       <OrdersTablePagination table={table} />
-      {selectedProduct && (
+      {showEditProduct && (
         <ProductForm
           open={showEditProduct}
-          onClose={() => {
-            setShowEditProduct(false)
-            setSelectedProduct(null)
-          }}
+          onClose={handleFormClose}
           product={selectedProduct}
         />
       )}
