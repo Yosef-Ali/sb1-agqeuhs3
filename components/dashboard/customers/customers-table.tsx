@@ -61,7 +61,17 @@ export function CustomersTable() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setCustomers(data || [])
+      
+      // Map the data to match the table structure
+      const formattedData = data?.map(customer => ({
+        id: customer.id,
+        name: customer.full_name,
+        email: customer.email,
+        phone: customer.phone,
+        created_at: customer.created_at
+      })) || []
+      
+      setCustomers(formattedData)
     } catch (err) {
       console.error("Error fetching customers:", err)
       setError(err instanceof Error ? err.message : "Failed to fetch customers")
@@ -76,7 +86,7 @@ export function CustomersTable() {
 
   const columns: ColumnDef<Customer>[] = [
     {
-      accessorKey: "name",
+      accessorKey: "full_name",
       header: ({ column }) => {
         return (
           <Button
