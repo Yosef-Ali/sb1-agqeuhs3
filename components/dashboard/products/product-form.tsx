@@ -1,11 +1,8 @@
 "use client"
 
-import { useState } from "react"
-import Image from "next/image"
-import { v4 as uuidv4 } from 'uuid'
+import { useState, useEffect, FormEvent } from "react"
 import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ImageUpload } from "@/components/ui/image-upload"
 import {
@@ -24,201 +21,135 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { Product } from '@/types/product'
+import { Product } from "@/types/product"
 
-export interface ProductFormProps {
+interface ProductFormProps {
   open: boolean
   onClose: () => void
+  product?: Product | null
   isLoading?: boolean
   setIsLoading?: (loading: boolean) => void
   onError?: (error: string) => void
-  product?: Product | null
 }
 
 export function ProductForm({
   open,
   onClose,
-  isLoading = false,
-  setIsLoading = () => {},
-  onError = () => {},
-  product
+  product,
+  isLoading,
+  setIsLoading,
+  onError,
 }: ProductFormProps) {
   const { toast } = useToast()
-  const [formData, setFormData] = useState<Partial<Product>>({
-    name: product?.name || "",
-    category: product?.category || "",
-    price: product?.price || 0,
-    stock_quantity: product?.stock_quantity || 0,
-    image_url: product?.image_url || "",
-    organic: product?.organic || false,
-    description: product?.description || ""
-  })
-  const [submitting, setSubmitting] = useState(false)
+  const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
+  const [price, setPrice] = useState("")
+  const [category, setCategory] = useState("")
+  const [stockQuantity, setStockQuantity] = useState("")
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | null>(null)
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  if (submitting) return // Prevent double submission
-  setSubmitting(true)
-  setIsLoading(true)
-  
-  try {
-    // Validate required fields
-    if (!formData.name || !formData.category || formData.price === undefined || formData.stock_quantity === undefined) {
-      throw new Error('Please fill in all required fields')
-    }
-
-    let finalImageUrl = formData.image_url;
-    
-    if (imageFile) {
-      try {
-        // Validate file size (max 5MB)
-        if (imageFile.size > 5 * 1024 * 1024) {
-          throw new Error('Image file size must be less than 5MB')
-        }
-
-        // Validate file type and extension
-        const validTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
-        const validExtensions = new Set(['jpg', 'jpeg', 'png', 'webp'])
-        const fileExt = imageFile.name.split('.').pop()?.toLowerCase()
-        
-        // Special handling for jpg/jpeg
-        const isJpegType = imageFile.type === 'image/jpeg' || imageFile.type === 'image/jpg'
-        const isJpegExt = fileExt === 'jpg' || fileExt === 'jpeg'
-        
-        if ((!validTypes.has(imageFile.type) && !isJpegType) || 
-            (!fileExt || (!validExtensions.has(fileExt) && !isJpegExt))) {
-          throw new Error('Please upload a valid image file (JPG/JPEG, PNG, or WebP)')
-        }
-
-        // Normalize extension to ensure consistency
-        let normalizedExt = fileExt
-        // Always normalize jpg/jpeg to jpg for consistency
-        if (isJpegType || isJpegExt) {
-          normalizedExt = 'jpg'
-        }
-        const fileName = `${uuidv4()}.${normalizedExt}`
-        const filePath = `products/${fileName}` // Store in products subfolder
-
-        // Upload the file
-        const { error: uploadError } = await supabase.storage
-          .from('product-images')
-          .upload(filePath, imageFile, {
-            cacheControl: '3600',
-            upsert: false
-          })
-
-        if (uploadError) {
-          console.error('Storage upload error:', uploadError)
-          // Check for specific storage permission errors
-          // Check for common storage errors
-          if (uploadError.message.includes('storage/object-not-found')) {
-            throw new Error('Storage bucket not found. Please contact support.')
-          }
-          if (uploadError.message.includes('storage/unauthorized') || 
-             uploadError.message.includes('permission')) {
-            throw new Error('Permission denied. Please try logging out and back in.')
-          }
-          if (uploadError.message.includes('Payload too large')) {
-            throw new Error('Image is too large. Please choose a smaller image (max 5MB).')
-          }
-          // For other storage errors
-          throw new Error('Unable to upload this image. Please try a different image or format (JPEG/PNG).')
-        }
-
-        // Get the public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('product-images')
-          .getPublicUrl(filePath)
-
-        if (!publicUrl) {
-          throw new Error('Failed to get public URL for uploaded image')
-        }
-
-        finalImageUrl = publicUrl
-      } catch (error) {
-        console.error('Image upload error:', error)
-        // Enhanced error handling with more specific messages
-        let errorMessage = 'Failed to upload image'
-        if (error instanceof Error) {
-          console.error('Error details:', {
-            name: error.name,
-            message: error.message,
-            stack: error.stack
-          })
-          
-          // Customize message based on error type
-          if (error.message.includes('too large')) {
-            errorMessage = 'Image is too large. Please choose a smaller image (max 5MB).'
-          } else if (error.message.includes('format') || error.message.includes('type')) {
-            errorMessage = 'Invalid image format. Please use JPEG or PNG.'
-          } else if (error.message.includes('permission') || error.message.includes('unauthorized')) {
-            errorMessage = 'Permission error. Please try logging out and back in.'
-          } else {
-            errorMessage = error.message
-          }
-        }
-        
-        toast({
-          title: "Image Upload Failed",
-          description: errorMessage,
-          variant: "destructive",
-        })
-        
-        // Don't throw the error, just return to prevent form submission
-        return
-      }
-    }
-
-    const productData = {
-      name: formData.name,
-      category: formData.category,
-      price: Number(formData.price),
-      stock_quantity: Number(formData.stock_quantity),
-      organic: Boolean(formData.organic),
-      description: formData.description || '',
-      image_url: finalImageUrl || '',
-      updated_at: new Date().toISOString()
-    }
-
-    if (product?.id) {
-      const { error } = await supabase
-        .from('products')
-        .update(productData)
-        .eq('id', product.id)
-
-      if (error) throw error
+  useEffect(() => {
+    if (product) {
+      setName(product.name || "")
+      setDescription(product.description || "")
+      setPrice(product.price?.toString() || "")
+      setCategory(product.category || "")
+      setStockQuantity(product.stock_quantity?.toString() || "")
+      setImageUrl(product.image_url || null)
     } else {
-      const { error } = await supabase
-        .from('products')
-        .insert([{
-          ...productData,
-          created_at: new Date().toISOString()
-        }])
-
-      if (error) throw error
+      resetForm()
     }
+  }, [product, open])
 
-    toast({
-      title: "Success",
-      description: product?.id ? "Product updated successfully" : "Product created successfully",
-    })
-    onClose()
-  } catch (error) {
-    console.error('Error saving product:', error)
-    const errorMessage = error instanceof Error ? error.message : 'Failed to save product'
-    toast({
-      title: "Error",
-      description: errorMessage,
-      variant: "destructive",
-    })
-    onError(errorMessage)
-  } finally {
-    setIsLoading(false)
-    setSubmitting(false)
+  const resetForm = () => {
+    setName("")
+    setDescription("")
+    setPrice("")
+    setCategory("")
+    setStockQuantity("")
+    setImageFile(null)
+    setImageUrl(null)
   }
-}
 
+  const uploadImage = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Date.now()}.${fileExt}`
+      const filePath = `product-images/${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file)
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (error) {
+      console.error('Supabase storage error:', error)
+      onError?.('Failed to upload image')
+      return null
+    }
+  }
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    
+    if (setIsLoading) setIsLoading(true)
+
+    try {
+      // Upload image if a new file is selected
+      let finalImageUrl = imageUrl
+      if (imageFile) {
+        const uploadedImageUrl = await uploadImage(imageFile)
+        if (uploadedImageUrl) finalImageUrl = uploadedImageUrl
+      }
+
+      const productData = {
+        name,
+        description,
+        price: parseFloat(price),
+        category,
+        stock_quantity: parseInt(stockQuantity),
+        image_url: finalImageUrl,
+      }
+
+      let result;
+      if (product) {
+        // Update existing product
+        result = await supabase
+          .from("products")
+          .update(productData)
+          .eq("id", product.id)
+      } else {
+        // Add new product
+        result = await supabase
+          .from("products")
+          .insert(productData)
+      }
+
+      if (result.error) throw result.error
+
+      toast({
+        title: product ? "Product Updated" : "Product Added",
+        description: `${name} has been successfully ${product ? 'updated' : 'added'}.`,
+      })
+
+      resetForm()
+      onClose()
+    } catch (error) {
+      console.error("Error saving product:", error)
+      onError?.(`Failed to ${product ? 'update' : 'add'} product`)
+    } finally {
+      if (setIsLoading) setIsLoading(false)
+    }
+  }
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
@@ -226,87 +157,86 @@ const handleSubmit = async (e: React.FormEvent) => {
         <SheetHeader>
           <SheetTitle>{product ? "Edit Product" : "Add Product"}</SheetTitle>
           <SheetDescription>
-            {product
-              ? "Make changes to the product here."
-              : "Add a new product to your store."}
+            {product ? "Update the details of this product" : "Create a new product"}
           </SheetDescription>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-          <div className="space-y-2">
-            <Label htmlFor="image">Product Image</Label>
-<ImageUpload
-  onChange={setImageFile}
-  disabled={false}
-/>
-{imageFile && (
-  <div className="mt-4">
-    <Label htmlFor="preview">Preview</Label>
-    <Image
-      id="preview"
-      src={URL.createObjectURL(imageFile)}
-      alt="Product Preview"
-      width={256}
-      height={256}
-      className="w-full h-auto max-h-64 object-cover rounded-md"
-    />
-  </div>
-)}
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="name">Name</Label>
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div>
+            <Label>Product Name</Label>
             <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               required
+              placeholder="Enter product name"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
+          <div>
+            <Label>Description</Label>
             <Input
-              id="category"
-              value={formData.category}
-              onChange={(e) =>
-                setFormData({ ...formData, category: e.target.value })
-              }
-              required
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter product description"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="price">Price</Label>
+          <div>
+            <Label>Price</Label>
             <Input
-              id="price"
               type="number"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              required
+              placeholder="Enter price"
               step="0.01"
-              value={formData.price}
-              onChange={(e) =>
-                setFormData({ ...formData, price: parseFloat(e.target.value) })
-              }
-              required
+              min="0"
             />
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="stock_quantity">Stock Quantity</Label>
+          <div>
+            <Label>Category</Label>
+            <Select value={category} onValueChange={setCategory}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="electronics">Electronics</SelectItem>
+                <SelectItem value="clothing">Clothing</SelectItem>
+                <SelectItem value="books">Books</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>Stock Quantity</Label>
             <Input
-              id="stock_quantity"
               type="number"
-              value={formData.stock_quantity}
-              onChange={(e) =>
-                setFormData({ ...formData, stock_quantity: parseInt(e.target.value) })
-              }
+              value={stockQuantity}
+              onChange={(e) => setStockQuantity(e.target.value)}
               required
+              placeholder="Enter stock quantity"
+              min="0"
             />
           </div>
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving..." : "Save"}
-            </Button>
+          <div>
+            <Label>Product Image</Label>
+            <ImageUpload 
+              onChange={(file) => setImageFile(file)}
+            />
+            {imageUrl && (
+              <div className="mt-2">
+                <img 
+                  src={imageUrl} 
+                  alt="Existing product image" 
+                  className="max-w-[200px] max-h-[200px] object-cover rounded-md"
+                />
+              </div>
+            )}
           </div>
+          <button 
+            type="submit" 
+            disabled={isLoading}
+            className="px-4 py-2 rounded bg-blue-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "Saving..." : (product ? "Update Product" : "Add Product")}
+          </button>
         </form>
       </SheetContent>
     </Sheet>
