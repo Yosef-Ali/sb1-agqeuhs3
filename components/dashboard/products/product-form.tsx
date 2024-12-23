@@ -60,42 +60,50 @@ const handleSubmit = async (e: React.FormEvent) => {
   setIsLoading(true)
   
   try {
-    let image_url = formData.image_url;
-    
-    if (imageFile) {
-      const fileExt = imageFile.name.split('.').pop()
-      const fileName = `${uuidv4()}.${fileExt}`
-      const filePath = `${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, imageFile)
-
-      if (uploadError) {
-        throw uploadError
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath)
-
-      image_url = publicUrl
+    // Validate required fields
+    if (!formData.name || !formData.category || formData.price === undefined || formData.stock_quantity === undefined) {
+      throw new Error('Please fill in all required fields')
     }
 
+    let finalImageUrl = formData.image_url;
+    
+    if (imageFile) {
+      try {
+        const fileExt = imageFile.name.split('.').pop()
+        const fileName = `${uuidv4()}.${fileExt}`
+        const filePath = `${fileName}`
+
+        const { error: uploadError, data } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, imageFile)
+
+        if (uploadError) {
+          throw uploadError
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(filePath)
+
+        finalImageUrl = publicUrl
+      } catch (uploadError) {
+        console.error('Image upload error:', uploadError)
+        throw new Error('Failed to upload image')
+      }
+    }
 
     const productData = {
       name: formData.name,
       category: formData.category,
-      price: formData.price,
-      stock_quantity: formData.stock_quantity,
-      organic: formData.organic,
-      description: formData.description,
-      image_url,
+      price: Number(formData.price),
+      stock_quantity: Number(formData.stock_quantity),
+      organic: Boolean(formData.organic),
+      description: formData.description || '',
+      image_url: finalImageUrl || '',
       updated_at: new Date().toISOString()
     }
 
     if (product?.id) {
-      // Update existing product
       const { error } = await supabase
         .from('products')
         .update(productData)
@@ -103,7 +111,6 @@ const handleSubmit = async (e: React.FormEvent) => {
 
       if (error) throw error
     } else {
-      // Create new product
       const { error } = await supabase
         .from('products')
         .insert([{
