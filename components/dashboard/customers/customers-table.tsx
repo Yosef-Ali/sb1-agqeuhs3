@@ -63,11 +63,8 @@ export function CustomersTable() {
       if (error) throw error
       
       const mappedCustomers = (data || []).map(customer => ({
-        id: customer.id,
-        full_name: customer.full_name,
-        address: customer.address,
-        phone: customer.phone,
-        created_at: customer.created_at
+        ...customer,
+        updated_at: customer.updated_at || customer.created_at
       }))
       
       setCustomers(mappedCustomers)

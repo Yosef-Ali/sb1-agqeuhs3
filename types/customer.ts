@@ -1,8 +1,9 @@
 export interface Customer {
   id: string
-  fullName: string
+  full_name: string | null
   email: string
+  address: string | null
   phone: string | null
-  createdAt: string
-  updatedAt: string
+  created_at: string
+  updated_at?: string
 }
