@@ -75,7 +75,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         }
 
         // Validate file type
-        const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
         if (!validTypes.includes(imageFile.type)) {
           throw new Error('Please upload a valid image file (JPEG, PNG, or WebP)')
         }
