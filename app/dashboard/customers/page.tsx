@@ -1,5 +1,4 @@
 import { Suspense } from "react"
-import { getCustomers } from "@/lib/supabase/services/customer"
 import { CustomersTable } from "@/components/dashboard/customers/customers-table"
 import { DashboardHeader } from "@/components/dashboard/header"
 import { DashboardShell } from "@/components/dashboard/shell"
@@ -8,9 +7,7 @@ import { PlusIcon } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
-export default async function CustomersPage() {
-  const customers = await getCustomers()
-
+export default function CustomersPage() {
   return (
     <DashboardShell>
       <DashboardHeader
@@ -23,7 +20,7 @@ export default async function CustomersPage() {
         </Button>
       </DashboardHeader>
       <Suspense fallback={<div>Loading...</div>}>
-        <CustomersTable customers={customers || []} />
+        <CustomersTable />
       </Suspense>
     </DashboardShell>
   )
