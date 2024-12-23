@@ -10,6 +10,9 @@ export const createServerClient = cache(() => {
 
 export async function auth() {
   const supabase = createServerClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) return null
+  
   const { data: { session } } = await supabase.auth.getSession()
   return session
 }
