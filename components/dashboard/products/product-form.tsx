@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Image from "next/image"
 import { v4 as uuidv4 } from 'uuid'
 import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
@@ -151,10 +152,12 @@ const handleSubmit = async (e: React.FormEvent) => {
 {imageFile && (
   <div className="mt-4">
     <Label htmlFor="preview">Preview</Label>
-    <img
+    <Image
       id="preview"
       src={URL.createObjectURL(imageFile)}
       alt="Product Preview"
+      width={256}
+      height={256}
       className="w-full h-auto max-h-64 object-cover rounded-md"
     />
   </div>
