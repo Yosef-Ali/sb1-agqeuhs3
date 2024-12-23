@@ -51,12 +51,15 @@ export function ProductForm({
     category: string;
     price: number;
     stock: number;
-    imageUrl?: string;
+    image_url?: string;
+    status: "in-stock" | "low-stock" | "out-of-stock";
   }>({
     name: product?.name || "",
     category: product?.category || "",
     price: product?.price || 0,
     stock: product?.stock || 0,
+    image_url: product?.image || "",
+    status: product?.status || "in-stock"
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
 
@@ -65,7 +68,7 @@ const handleSubmit = async (e: React.FormEvent) => {
   setIsLoading(true)
   
   try {
-    let imageUrl = formData.imageUrl;
+    let image_url = formData.image_url;
     
     if (imageFile) {
       const fileExt = imageFile.name.split('.').pop()
@@ -84,12 +87,23 @@ const handleSubmit = async (e: React.FormEvent) => {
         .from('product-images')
         .getPublicUrl(filePath)
 
-      imageUrl = publicUrl
+      image_url = publicUrl
     }
 
+    // Calculate status based on stock
+    const status = formData.stock === 0 
+      ? "out-of-stock" 
+      : formData.stock < 10 
+        ? "low-stock" 
+        : "in-stock";
+
     const productData = {
-      ...formData,
-      image_url: imageUrl,
+      name: formData.name,
+      category: formData.category,
+      price: formData.price,
+      stock: formData.stock,
+      status,
+      image_url,
       updated_at: new Date().toISOString()
     }
 
@@ -105,12 +119,16 @@ const handleSubmit = async (e: React.FormEvent) => {
       // Create new product
       const { error } = await supabase
         .from('products')
-        .insert([productData])
+        .insert([{
+          ...productData,
+          created_at: new Date().toISOString()
+        }])
 
       if (error) throw error
     }
 
-    onClose()
+    // Refresh the products list
+    window.location.reload()
   } catch (error) {
     console.error('Error saving product:', error)
     onError(error instanceof Error ? error.message : 'Failed to save product')
