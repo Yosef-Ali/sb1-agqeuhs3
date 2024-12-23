@@ -81,12 +81,6 @@ const handleSubmit = async (e: React.FormEvent) => {
       image_url = publicUrl
     }
 
-    // Calculate status based on stock
-    const status = formData.stock === 0 
-      ? "out-of-stock" 
-      : formData.stock < 10 
-        ? "low-stock" 
-        : "in-stock";
 
     const productData = {
       name: formData.name,
@@ -202,13 +196,13 @@ const handleSubmit = async (e: React.FormEvent) => {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="stock">Stock</Label>
+            <Label htmlFor="stock_quantity">Stock Quantity</Label>
             <Input
-              id="stock"
+              id="stock_quantity"
               type="number"
-              value={formData.stock}
+              value={formData.stock_quantity}
               onChange={(e) =>
-                setFormData({ ...formData, stock: parseInt(e.target.value) })
+                setFormData({ ...formData, stock_quantity: parseInt(e.target.value) })
               }
               required
             />
