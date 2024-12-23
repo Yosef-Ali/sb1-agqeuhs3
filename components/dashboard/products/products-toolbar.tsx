@@ -14,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { DataTableViewOptions } from "@/components/dashboard/orders/orders-view-options"
+import { useToast } from "@/hooks/use-toast"
 
 interface DataTableToolbarProps<TData> {
   table?: Table<TData>
@@ -23,6 +24,18 @@ export function ProductsTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const [showAddProduct, setShowAddProduct] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { toast } = useToast()
+
+  const handleError = (error: string) => {
+    toast({
+      title: "Error",
+      description: error,
+      variant: "destructive",
+    })
+    setIsLoading(false)
+  }
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
@@ -50,7 +63,7 @@ export function ProductsTableToolbar<TData>({
             <SelectItem value="out-of-stock">Out of Stock</SelectItem>
           </SelectContent>
         </Select>
-        {table?.getState().columnFilters.length > 0 && (
+        {table && table.getState().columnFilters.length > 0 && (
           <Button
             variant="ghost"
             onClick={() => table.resetColumnFilters()}
@@ -67,13 +80,20 @@ export function ProductsTableToolbar<TData>({
           size="sm"
           className="h-8"
           onClick={() => setShowAddProduct(true)}
+          disabled={isLoading}
         >
           <PlusIcon className="h-4 w-4" />
-          <span className="ml-2">Add Product</span>
+          <span className="ml-2">{isLoading ? "Loading..." : "Add Product"}</span>
         </Button>
-        <DataTableViewOptions table={table} />
+        {table && <DataTableViewOptions table={table} />}
       </div>
-      <ProductForm open={showAddProduct} onClose={() => setShowAddProduct(false)} />
+      <ProductForm 
+        open={showAddProduct} 
+        onClose={() => setShowAddProduct(false)}
+        isLoading={isLoading}
+        setIsLoading={setIsLoading}
+        onError={handleError}
+      />
     </div>
   )
 }

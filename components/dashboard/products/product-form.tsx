@@ -20,9 +20,12 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-interface ProductFormProps {
+export interface ProductFormProps {
   open: boolean
   onClose: () => void
+  isLoading?: boolean
+  setIsLoading?: (loading: boolean) => void
+  onError?: (error: string) => void
   product?: {
     id: string
     name: string
@@ -33,8 +36,21 @@ interface ProductFormProps {
   }
 }
 
-export function ProductForm({ open, onClose, product }: ProductFormProps) {
-  const [formData, setFormData] = useState({
+export function ProductForm({
+  open,
+  onClose,
+  isLoading = false,
+  setIsLoading = () => {},
+  onError = () => {},
+  product
+}: ProductFormProps) {
+  const [formData, setFormData] = useState<{
+    name: string;
+    category: string;
+    price: number;
+    stock: number;
+    imageUrl?: string;
+  }>({
     name: product?.name || "",
     category: product?.category || "",
     price: product?.price || 0,
@@ -42,34 +58,52 @@ export function ProductForm({ open, onClose, product }: ProductFormProps) {
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault()
+  
+  try {
+    let productData = { ...formData };
     
-    try {
-      if (imageFile) {
-        const formData = new FormData()
-        formData.append('file', imageFile)
-        
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData
-        })
+    if (imageFile) {
+      const formData = new FormData()
+      formData.append('file', imageFile)
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
 
-        if (!response.ok) {
-          throw new Error('Failed to upload image')
-        }
-
-        const { url } = await response.json()
-        // TODO: Save product with image URL
-        console.log('Image uploaded:', url)
+      if (!response.ok) {
+        throw new Error('Failed to upload image')
       }
-      
-      // TODO: Save other product data
-      console.log('Product data:', formData)
-      
-      onClose()
+
+      const { url } = await response.json()
+      productData = {
+        ...productData,
+        imageUrl: url
+      }
+      console.log('Product data with image:', productData)
+    }
+    
+    console.log('Product data:', productData)
+    
+    // Save product data here
+    // ...
+
+    onClose()
+  } catch (error) {
+    console.error('Error saving product:', error)
+  }
+}
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      setIsLoading(true)
+      // ...existing form submission code...
     } catch (error) {
-      console.error('Error saving product:', error)
+      onError(error instanceof Error ? error.message : 'Something went wrong')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -87,10 +121,21 @@ export function ProductForm({ open, onClose, product }: ProductFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4 pt-4">
           <div className="space-y-2">
             <Label htmlFor="image">Product Image</Label>
-            <ImageUpload
-              onChange={setImageFile}
-              disabled={false}
-            />
+<ImageUpload
+  onChange={setImageFile}
+  disabled={false}
+/>
+{imageFile && (
+  <div className="mt-4">
+    <Label htmlFor="preview">Preview</Label>
+    <img
+      id="preview"
+      src={URL.createObjectURL(imageFile)}
+      alt="Product Preview"
+      className="w-full h-auto max-h-64 object-cover rounded-md"
+    />
+  </div>
+)}
           </div>
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
@@ -143,8 +188,8 @@ export function ProductForm({ open, onClose, product }: ProductFormProps) {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit">
-              {product ? "Update Product" : "Add Product"}
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>

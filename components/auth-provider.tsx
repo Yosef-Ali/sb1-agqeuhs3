@@ -1,28 +1,30 @@
-'use client'
+"use client"
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
-import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const supabase = createClientComponentClient()
   const router = useRouter()
 
   useEffect(() => {
-    const supabase = createClientComponentClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    )
-
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      // Verify user authentication state using getUser
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user && event === 'SIGNED_OUT') {
+        router.push('/auth')
+      }
       router.refresh()
     })
 
     return () => {
       subscription.unsubscribe()
     }
-  }, [router])
+  }, [supabase, router])
 
-  return children
+  return <>{children}</>
 }

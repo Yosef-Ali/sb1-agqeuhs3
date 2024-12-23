@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
@@ -34,6 +34,11 @@ import {
 import { Button } from "@/components/ui/button"
 import { OrdersTablePagination } from "../orders/orders-pagination"
 import { ProductForm } from "./product-form"
+import { createClient } from "@supabase/supabase-js"
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 type Product = {
   id: string
@@ -58,37 +63,8 @@ const getStatusColor = (status: string) => {
   }
 }
 
-const data: Product[] = [
-  {
-    id: "PROD001",
-    image: "/placeholder.jpg",
-    name: "Organic Apples",
-    category: "Fruits",
-    price: 4.99,
-    stock: 100,
-    status: "in-stock",
-  },
-  {
-    id: "PROD002",
-    image: "/placeholder.jpg",
-    name: "Organic Bananas",
-    category: "Fruits",
-    price: 3.99,
-    stock: 5,
-    status: "low-stock",
-  },
-  {
-    id: "PROD003",
-    image: "/placeholder.jpg",
-    name: "Organic Oranges",
-    category: "Fruits",
-    price: 5.99,
-    stock: 0,
-    status: "out-of-stock",
-  }
-]
-
 export function ProductsTable() {
+  const [products, setProducts] = useState<Product[]>([])
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -96,24 +72,35 @@ export function ProductsTable() {
   const [showEditProduct, setShowEditProduct] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase.from("products").select("*")
+      if (error) {
+        console.error("Error fetching products:", error)
+      } else {
+        setProducts(data)
+      }
+    }
+    fetchProducts()
+  }, [])
+
   const columns: ColumnDef<Product>[] = [
     {
       accessorKey: "image",
       header: "Image",
-      cell: ({ row }) => {
-        return (
-          <div className="flex items-center gap-2">
-            <div className="relative h-10 w-10">
-              <Image
-                src={row.getValue("image") || "/placeholder.jpg"}
-                alt={row.getValue("name")}
-                className="object-cover rounded-md"
-                fill
-              />
-            </div>
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          <div className="relative h-10 w-10">
+            <Image
+              src={row.getValue("image") || "/placeholder.jpg"}
+              alt={row.getValue("name")}
+              className="object-cover rounded-md"
+              width={40}
+              height={40}
+            />
           </div>
-        )
-      },
+        </div>
+      ),
     },
     {
       accessorKey: "id",
@@ -222,12 +209,16 @@ export function ProductsTable() {
   }
 
   const handleDelete = async (product: Product) => {
-    // TODO: Implement delete logic
-    console.log("Delete product:", product)
+    const { error } = await supabase.from("products").delete().eq("id", product.id)
+    if (error) {
+      console.error("Error deleting product:", error)
+    } else {
+      setProducts(products.filter(p => p.id !== product.id))
+    }
   }
 
   const table = useReactTable({
-    data,
+    data: products,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -311,4 +302,3 @@ export function ProductsTable() {
     </div>
   )
 }
-

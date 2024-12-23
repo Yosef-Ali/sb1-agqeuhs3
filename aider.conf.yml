@@ -1,0 +1,86 @@
+# Model Configuration
+# model: claude-3-5-sonnet-20241022  # Main model for complex tasks
+# dirty_model: claude-3-haiku-20240307  # Cheaper model for simple edits
+# use_faster_model: true  # Enable using the cheaper model when appropriate
+
+model: claude-3-haiku-20240307  # Main model for complex tasks
+dirty_model: grok-beta  # Secondary model for simple edits
+use_faster_model: true  # Enable using the secondary model when appropriate
+
+
+# API Configuration
+api_base: null
+local_server: false
+
+# Editor Configuration
+edit_format: simple           # Changed to simple for clearer Next.js/React edits
+auto_commits: true
+commit_message_format: "feat: {{message}}"  # Using conventional commits
+
+# Display and Behavior
+show_diffs: true
+pretty: true
+dark_mode: true
+verbose: true                 # Enable for better debugging during development
+
+# File Handling
+ignore_files:
+  - .git/*
+  - .env*                     # Ignore all env files
+  - .aider*
+  - node_modules/*
+  - .next/*                   # Next.js build output
+  - build/*
+  - dist/*
+  - coverage/*
+  - *.log
+  - .DS_Store
+  - .vercel                   # Vercel deployment files
+  - supabase/.branches/*      # Supabase files
+  - supabase/.temp/*
+  - .turbo                    # Turbo cache
+  - .swc                      # SWC compilation cache
+
+# TypeScript/JavaScript specific
+watch_patterns:              # Files to actively monitor
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.json"
+  - "**/*.css"
+  - "**/*.scss"
+
+# Context Management
+input_history_file: ./.aider.input.history   # Changed to project-local
+chat_history_file: ./.aider.chat.history     # Changed to project-local
+auto_repository_map: true
+repository_map_limit: 2048    # Increased for larger Next.js projects
+
+# Git Configuration
+git_staging: direct          # Changed to direct for faster workflow
+auto_sync_git: true
+git_commit_prefix: "feat: "  # Using conventional commits
+
+# Safety and Validation
+validate_edits: true
+backup_files: true
+
+# Project-specific settings
+default_extension: ".tsx"    # Default to TypeScript React files
+file_type_settings:
+  tsx:
+    indent: 2
+    quote: "single"
+  ts:
+    indent: 2
+    quote: "single"
+  json:
+    indent: 2
+  css:
+    indent: 2
+
+# Editor Behavior
+live_mode: false             # Disabled for safety in production code
+pretty_diffs: true
+max_context: 4000           # Increased for larger components

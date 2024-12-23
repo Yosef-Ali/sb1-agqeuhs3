@@ -10,18 +10,29 @@ export default async function DashboardLayout({
   children: React.ReactNode
 }) {
   const session = await auth()
-  
+
   if (!session) {
     redirect('/login')
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center space-y-6">
-      <div className="w-full">
-        <DashboardNav user={session?.user} />
+    <div className="flex min-h-screen flex-col w-full">
+      {/* Full-width nav background */}
+      <div className="w-full border-b bg-background">
+        <div className="container mx-auto flex justify-center">
+          <div className="w-full max-w-7xl">
+            <DashboardNav user={session?.user} />
+          </div>
+        </div>
       </div>
-      <main className="container flex-1 gap-12 max-w-7xl mx-auto px-4">
-        {children}
+
+      {/* Main content */}
+      <main className="flex-1 w-full">
+        <div className="container mx-auto flex justify-center py-6">
+          <div className="w-full max-w-7xl">
+            {children}
+          </div>
+        </div>
       </main>
     </div>
   )
