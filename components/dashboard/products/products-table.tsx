@@ -61,7 +61,7 @@ const getStatusColor = (status: string) => {
 const data: Product[] = [
   {
     id: "PROD001",
-    image: "/images/products/apples.jpg",
+    image: "/placeholder.jpg",
     name: "Organic Apples",
     category: "Fruits",
     price: 4.99,
@@ -70,7 +70,7 @@ const data: Product[] = [
   },
   {
     id: "PROD002",
-    image: "/images/products/bananas.jpg",
+    image: "/placeholder.jpg",
     name: "Organic Bananas",
     category: "Fruits",
     price: 3.99,
@@ -79,7 +79,7 @@ const data: Product[] = [
   },
   {
     id: "PROD003",
-    image: "/images/products/oranges.jpg",
+    image: "/placeholder.jpg",
     name: "Organic Oranges",
     category: "Fruits",
     price: 5.99,

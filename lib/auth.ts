@@ -22,6 +22,11 @@ export async function requireAuth() {
   return session
 }
 
+export async function signOut() {
+  const supabase = createServerClient()
+  await supabase.auth.signOut()
+}
+
 export async function getUser() {
   const session = await auth()
   return session?.user ?? null

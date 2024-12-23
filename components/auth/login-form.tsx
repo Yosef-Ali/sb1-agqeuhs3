@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/use-toast'
@@ -16,7 +17,7 @@ export function LoginForm() {
   const [isLoading, setIsLoading] = useState(false)
   const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const { toast } = useToast()
-
+  const router = useRouter()
   const supabase = createClientComponentClient()
 
   async function onSubmit(e: React.FormEvent) {
@@ -37,10 +38,14 @@ export function LoginForm() {
         title: 'Success',
         description: 'You have successfully signed in.',
       })
+      
+      router.refresh()
+      router.push('/dashboard')
     } catch (error) {
+      const err = error as Error
       toast({
         title: 'Error',
-        description: 'Invalid email or password.',
+        description: err.message || 'Invalid email or password.',
         variant: 'destructive',
       })
     } finally {
