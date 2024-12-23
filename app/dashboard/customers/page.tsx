@@ -4,7 +4,6 @@ import { Suspense, useState } from "react"
 import { CustomerForm } from "@/components/dashboard/customers/customer-form"
 import { CustomersTable } from "@/components/dashboard/customers/customers-table"
 import { DashboardHeader } from "@/components/dashboard/header"
-import { DashboardShell } from "@/components/dashboard/shell"
 import { Button } from "@/components/ui/button"
 import { PlusIcon } from "lucide-react"
 
@@ -13,7 +12,7 @@ export const dynamic = "force-dynamic"
 export default function CustomersPage() {
   const [showAddCustomer, setShowAddCustomer] = useState(false)
   return (
-    <DashboardShell>
+    <div className="grid items-start gap-8">
       <DashboardHeader heading="Customers" text="Manage your customers">
         <Button onClick={() => setShowAddCustomer(true)}>
           <PlusIcon className="mr-2 h-4 w-4" />
@@ -31,6 +30,6 @@ export default function CustomersPage() {
           setIsLoading={() => {}}
         />
       )}
-    </DashboardShell>
+    </div>
   )
 }
