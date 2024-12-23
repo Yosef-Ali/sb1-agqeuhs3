@@ -95,13 +95,19 @@ const handleSubmit = async (e: React.FormEvent) => {
         if (uploadError) {
           console.error('Storage upload error:', uploadError)
           // Check for specific storage permission errors
-          if (uploadError.message.includes('storage/object-not-found') || 
-              uploadError.message.includes('storage/unauthorized') ||
-              uploadError.message.includes('permission')) {
-            throw new Error('Unable to upload image due to permission settings. Please contact support.')
+          // Check for common storage errors
+          if (uploadError.message.includes('storage/object-not-found')) {
+            throw new Error('Storage bucket not found. Please contact support.')
+          }
+          if (uploadError.message.includes('storage/unauthorized') || 
+             uploadError.message.includes('permission')) {
+            throw new Error('Permission denied. Please try logging out and back in.')
+          }
+          if (uploadError.message.includes('Payload too large')) {
+            throw new Error('Image is too large. Please choose a smaller image (max 5MB).')
           }
           // For other storage errors
-          throw new Error(`Image upload failed. Please try again or use a different image.`)
+          throw new Error('Unable to upload this image. Please try a different image or format (JPEG/PNG).')
         }
 
         // Get the public URL
@@ -116,21 +122,32 @@ const handleSubmit = async (e: React.FormEvent) => {
         finalImageUrl = publicUrl
       } catch (error) {
         console.error('Image upload error:', error)
-        const errorMessage = error instanceof Error ? error.message : 'Failed to upload image'
-        toast({
-          title: "Image Upload Failed",
-          description: errorMessage,
-          variant: "destructive",
-        })
-        
-        // Log additional details for debugging
+        // Enhanced error handling with more specific messages
+        let errorMessage = 'Failed to upload image'
         if (error instanceof Error) {
           console.error('Error details:', {
             name: error.name,
             message: error.message,
             stack: error.stack
           })
+          
+          // Customize message based on error type
+          if (error.message.includes('too large')) {
+            errorMessage = 'Image is too large. Please choose a smaller image (max 5MB).'
+          } else if (error.message.includes('format') || error.message.includes('type')) {
+            errorMessage = 'Invalid image format. Please use JPEG or PNG.'
+          } else if (error.message.includes('permission') || error.message.includes('unauthorized')) {
+            errorMessage = 'Permission error. Please try logging out and back in.'
+          } else {
+            errorMessage = error.message
+          }
         }
+        
+        toast({
+          title: "Image Upload Failed",
+          description: errorMessage,
+          variant: "destructive",
+        })
         
         // Don't throw the error, just return to prevent form submission
         return
