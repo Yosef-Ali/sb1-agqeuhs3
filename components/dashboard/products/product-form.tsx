@@ -162,6 +162,7 @@ export function ProductForm({
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-8">
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="name">Product Name</Label>
@@ -249,7 +250,7 @@ export function ProductForm({
 
           <div className="flex justify-end space-x-4 pt-4">
             <Button
-              variant="ghost"
+              variant="outline"
               onClick={onClose}
               type="button"
             >
