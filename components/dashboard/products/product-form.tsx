@@ -153,90 +153,114 @@ export function ProductForm({
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent>
+      <SheetContent className="sm:max-w-2xl">
         <SheetHeader>
           <SheetTitle>{product ? "Edit Product" : "Add Product"}</SheetTitle>
           <SheetDescription>
             {product ? "Update the details of this product" : "Create a new product"}
           </SheetDescription>
         </SheetHeader>
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div>
-            <Label>Product Name</Label>
-            <Input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="Enter product name"
-            />
+        <form onSubmit={handleSubmit} className="space-y-6 mt-8">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Product Name</Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="Enter product name"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select value={category} onValueChange={setCategory}>
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="electronics">Electronics</SelectItem>
+                  <SelectItem value="clothing">Clothing</SelectItem>
+                  <SelectItem value="books">Books</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-          <div>
-            <Label>Description</Label>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
             <Input
+              id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter product description"
             />
           </div>
-          <div>
-            <Label>Price</Label>
-            <Input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              required
-              placeholder="Enter price"
-              step="0.01"
-              min="0"
-            />
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="price">Price</Label>
+              <Input
+                id="price"
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                required
+                placeholder="Enter price"
+                step="0.01"
+                min="0"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="stock">Stock Quantity</Label>
+              <Input
+                id="stock"
+                type="number"
+                value={stockQuantity}
+                onChange={(e) => setStockQuantity(e.target.value)}
+                required
+                placeholder="Enter stock quantity"
+                min="0"
+              />
+            </div>
           </div>
-          <div>
-            <Label>Category</Label>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="electronics">Electronics</SelectItem>
-                <SelectItem value="clothing">Clothing</SelectItem>
-                <SelectItem value="books">Books</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label>Stock Quantity</Label>
-            <Input
-              type="number"
-              value={stockQuantity}
-              onChange={(e) => setStockQuantity(e.target.value)}
-              required
-              placeholder="Enter stock quantity"
-              min="0"
-            />
-          </div>
-          <div>
+
+          <div className="space-y-2">
             <Label>Product Image</Label>
-            <ImageUpload 
-              onChange={(file) => setImageFile(file)}
-            />
-            {imageUrl && (
-              <div className="mt-2">
-                <img 
-                  src={imageUrl} 
-                  alt="Existing product image" 
-                  className="max-w-[200px] max-h-[200px] object-cover rounded-md"
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <ImageUpload 
+                  onChange={(file) => setImageFile(file)}
                 />
               </div>
-            )}
+              {imageUrl && (
+                <div className="flex items-center justify-center">
+                  <img 
+                    src={imageUrl} 
+                    alt="Existing product image" 
+                    className="max-w-[200px] max-h-[200px] object-cover rounded-md"
+                  />
+                </div>
+              )}
+            </div>
           </div>
-          <button 
-            type="submit" 
-            disabled={isLoading}
-            className="px-4 py-2 rounded bg-blue-500 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isLoading ? "Saving..." : (product ? "Update Product" : "Add Product")}
-          </button>
+
+          <div className="flex justify-end space-x-4 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={onClose}
+              type="button"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+            >
+              {isLoading ? "Saving..." : (product ? "Update Product" : "Add Product")}
+            </Button>
+          </div>
         </form>
       </SheetContent>
     </Sheet>
