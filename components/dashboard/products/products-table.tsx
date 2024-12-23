@@ -318,29 +318,31 @@ export function ProductsTable() {
       )}
 
       <div className="relative min-h-[400px]">
-        {isLoading ? (
-          <div className="w-full space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-4 w-full">
-                <Skeleton className="h-12 w-12" />
-                <Skeleton className="h-12 flex-1" />
-                <Skeleton className="h-12 w-24" />
-                <Skeleton className="h-12 w-24" />
-                <Skeleton className="h-12 w-24" />
-              </div>
-            ))}
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="absolute inset-0 flex items-center justify-center text-red-500">
             {error}
           </div>
-        ) : products.length === 0 ? (
-          <div className="absolute inset-0 flex items-center justify-center text-gray-500">
-            No products found
-          </div>
         ) : (
           <>
-            <Table>
+            <div className="w-full">
+              {isLoading ? (
+                <div className="w-full space-y-4">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex items-center space-x-4 w-full">
+                      <Skeleton className="h-12 w-12" />
+                      <Skeleton className="h-12 flex-1" />
+                      <Skeleton className="h-12 w-24" />
+                      <Skeleton className="h-12 w-24" />
+                      <Skeleton className="h-12 w-24" />
+                    </div>
+                  ))}
+                </div>
+              ) : products.length === 0 ? (
+                <div className="flex items-center justify-center h-[400px] text-gray-500">
+                  No products found
+                </div>
+              ) : (
+                <Table>
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
@@ -387,7 +389,9 @@ export function ProductsTable() {
                   </TableRow>
                 )}
               </TableBody>
-            </Table>
+                </Table>
+              )}
+            </div>
           </>
         )}
       </div>
