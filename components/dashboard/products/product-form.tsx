@@ -40,7 +40,6 @@ export interface ProductFormProps {
 }
 
 export function ProductForm({
-  const { toast } = useToast()
   open,
   onClose,
   isLoading = false,
@@ -48,6 +47,7 @@ export function ProductForm({
   onError = () => {},
   product
 }: ProductFormProps) {
+  const { toast } = useToast()
   const [formData, setFormData] = useState<{
     name: string;
     category: string;
