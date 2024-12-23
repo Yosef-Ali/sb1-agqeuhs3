@@ -1,6 +1,7 @@
 import { Metadata } from "next"
 import { ProductsTable } from "@/components/dashboard/products/products-table"
 import { ProductsTableToolbar } from "@/components/dashboard/products/products-toolbar"
+import React from "react"
 
 export const metadata: Metadata = {
   title: "Products",

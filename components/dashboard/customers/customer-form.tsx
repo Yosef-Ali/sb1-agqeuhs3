@@ -32,13 +32,19 @@ export function CustomerForm({
   setIsLoading,
   onError,
 }: CustomerFormProps) {
-  const [formData, setFormData] = useState<Partial<Customer>>(
-    customer || {
-      name: "",
-      email: "",
-      phone: "",
-    }
-  )
+  const [formData, setFormData] = useState<{
+    full_name: string;
+    email: string;
+    phone: string;
+  }>(customer ? {
+    full_name: customer.full_name || "",
+    email: customer.email || "",
+    phone: customer.phone || "",
+  } : {
+    full_name: "",
+    email: "",
+    phone: "",
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -92,9 +98,9 @@ export function CustomerForm({
               <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
-                value={formData.name}
+                value={formData.full_name ?? ""}
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  setFormData({ ...formData, full_name: e.target.value })
                 }
                 placeholder="Enter customer name"
                 disabled={isLoading}

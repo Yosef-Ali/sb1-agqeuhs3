@@ -95,29 +95,29 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 }
-import { auth } from "@/lib/auth"
-import { DashboardNav } from "@/components/dashboard/nav"
+// import { auth } from "@/lib/auth"
+// import { DashboardNav } from "@/components/dashboard/nav"
 
-export default async function DashboardPage() {
-  const user = await auth()
+// export default async function DashboardPage() {
+//   const user = await auth()
   
-  return (
-    <div className="flex min-h-screen flex-col space-y-6">
-      <DashboardNav user={user} />
-      <div className="container grid flex-1 gap-12">
-        <main className="flex w-full flex-1 flex-col overflow-hidden">
-          <div className="grid items-start gap-8">
-            <div className="flex items-center justify-between px-2">
-              <div className="grid gap-1">
-                <h1 className="font-heading text-3xl md:text-4xl">Dashboard</h1>
-                <p className="text-lg text-muted-foreground">
-                  Welcome to your dashboard
-                </p>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-    </div>
-  )
-}
+//   return (
+//     <div className="flex min-h-screen flex-col space-y-6">
+//       <DashboardNav user={user} />
+//       <div className="container grid flex-1 gap-12">
+//         <main className="flex w-full flex-1 flex-col overflow-hidden">
+//           <div className="grid items-start gap-8">
+//             <div className="flex items-center justify-between px-2">
+//               <div className="grid gap-1">
+//                 <h1 className="font-heading text-3xl md:text-4xl">Dashboard</h1>
+//                 <p className="text-lg text-muted-foreground">
+//                   Welcome to your dashboard
+//                 </p>
+//               </div>
+//             </div>
+//           </div>
+//         </main>
+//       </div>
+//     </div>
+//   )
+// }

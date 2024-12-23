@@ -21,7 +21,7 @@ export default async function DashboardLayout({
       <div className="w-full border-b bg-background">
         <div className="container mx-auto flex justify-center">
           <div className="w-full max-w-7xl">
-            <DashboardNav user={session?.user} />
+            <DashboardNav user={session} />
           </div>
         </div>
       </div>
