@@ -163,8 +163,8 @@ export function ProductForm({
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-8">
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+          <div className="space-y-8">
+            <div className="space-y-3">
               <Label htmlFor="name">Product Name</Label>
               <Input
                 id="name"
@@ -174,7 +174,8 @@ export function ProductForm({
                 placeholder="Enter product name"
               />
             </div>
-            <div className="space-y-2">
+
+            <div className="space-y-3">
               <Label htmlFor="category">Category</Label>
               <Select value={category} onValueChange={setCategory}>
                 <SelectTrigger id="category">
@@ -188,20 +189,18 @@ export function ProductForm({
                 </SelectContent>
               </Select>
             </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Input
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter product description"
-            />
-          </div>
+            <div className="space-y-3">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Enter product description"
+              />
+            </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <Label htmlFor="price">Price</Label>
               <Input
                 id="price"
@@ -214,7 +213,8 @@ export function ProductForm({
                 min="0"
               />
             </div>
-            <div className="space-y-2">
+
+            <div className="space-y-3">
               <Label htmlFor="stock">Stock Quantity</Label>
               <Input
                 id="stock"
