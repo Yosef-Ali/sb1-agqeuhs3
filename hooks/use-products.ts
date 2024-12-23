@@ -10,28 +10,41 @@ export function useProducts() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isMounted = true;
+    
     async function fetchProducts() {
       try {
         setError(null);
         const { data, error: supabaseError } = await supabase
           .from('products')
           .select('*')
-          .order('created_at', { ascending: false });
+          .order('created_at', { ascending: false })
+          .throwOnError();
 
         if (supabaseError) {
           throw supabaseError;
         }
 
-        setProducts(data || []);
+        if (isMounted) {
+          setProducts(data || []);
+        }
       } catch (err) {
         console.error('Error fetching products:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch products');
+        if (isMounted) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch products');
+        }
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
     fetchProducts();
+    
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return { products, isLoading, error };
