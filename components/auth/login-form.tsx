@@ -26,12 +26,24 @@ export function LoginForm() {
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          // Check if user exists but with different provider
+          const { data: { users } } = await supabase.auth.admin.listUsers({
+            filter: {
+              email: email
+            }
+          })
+          
+          if (users?.length > 0) {
+            throw new Error('This email is registered with a different login method. Please try signing in with Google.')
+          }
+        }
         throw error
       }
 
@@ -64,15 +76,14 @@ export function LoginForm() {
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
-            hd: 'domain.com',
           },
         },
       })
       if (error) throw error
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Something went wrong. Please try again.',
+        title: 'Google Sign In Failed',
+        description: error instanceof Error ? error.message : 'Failed to sign in with Google. Please try again.',
         variant: 'destructive',
       })
     } finally {
