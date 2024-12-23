@@ -37,15 +37,7 @@ import { ProductForm } from "./product-form"
 import { supabase } from "@/lib/supabase/client"
 import { v4 as uuidv4 } from 'uuid'
 
-type Product = {
-  id: string
-  image: string
-  name: string
-  category: string
-  price: number
-  stock: number
-  status: "in-stock" | "low-stock" | "out-of-stock"
-}
+import { Product } from "@/types/product"
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -93,13 +85,13 @@ export function ProductsTable() {
 
   const columns: ColumnDef<Product>[] = [
     {
-      accessorKey: "image",
+      accessorKey: "image_url",
       header: "Image",
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <div className="relative h-10 w-10">
             <Image
-              src={row.getValue("image") || "/placeholder.jpg"}
+              src={row.getValue("image_url") || "/placeholder.jpg"}
               alt={row.getValue("name")}
               className="object-cover rounded-md"
               width={40}
@@ -154,7 +146,7 @@ export function ProductsTable() {
       },
     },
     {
-      accessorKey: "stock",
+      accessorKey: "stock_quantity",
       header: ({ column }) => {
         return (
           <Button
@@ -168,10 +160,16 @@ export function ProductsTable() {
       },
     },
     {
-      accessorKey: "status",
+      id: "status",
       header: "Status",
       cell: ({ row }) => {
-        const status = row.getValue("status") as string
+        const stock = row.getValue("stock_quantity") as number
+        const status = stock === 0 
+          ? "out-of-stock" 
+          : stock < 10 
+            ? "low-stock" 
+            : "in-stock"
+        
         const formatStatus = (text: string) => {
           if (!text) return '';
           return text
