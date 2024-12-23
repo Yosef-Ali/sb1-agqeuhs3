@@ -31,7 +31,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button" // Ensure correct import
 import { OrdersTablePagination } from "../orders/orders-pagination"
 import { ProductForm } from "./product-form"
 import { DeleteConfirmation } from "@/components/ui/delete-confirmation"
@@ -108,7 +108,7 @@ export function ProductsTable() {
       header: ({ column }) => {
         return (
           <Button
-            variant="ghost"
+            variant="secondary"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Product ID
@@ -130,7 +130,7 @@ export function ProductsTable() {
       header: ({ column }) => {
         return (
           <Button
-            variant="ghost"
+            variant="secondary"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Price
@@ -152,7 +152,7 @@ export function ProductsTable() {
       header: ({ column }) => {
         return (
           <Button
-            variant="ghost"
+            variant="secondary"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
             Stock
@@ -166,12 +166,12 @@ export function ProductsTable() {
       header: "Status",
       cell: ({ row }) => {
         const stock = row.getValue("stock_quantity") as number
-        const status = stock === 0 
-          ? "out-of-stock" 
-          : stock < 10 
-            ? "low-stock" 
+        const status = stock === 0
+          ? "out-of-stock"
+          : stock < 10
+            ? "low-stock"
             : "in-stock"
-        
+
         const formatStatus = (text: string) => {
           if (!text) return '';
           return text
@@ -179,7 +179,7 @@ export function ProductsTable() {
             .map(word => word.charAt(0).toUpperCase() + word.slice(1))
             .join(" ");
         };
-        
+
         return (
           <Badge variant={getStatusColor(status)}>
             {formatStatus(status)}
@@ -195,14 +195,14 @@ export function ProductsTable() {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
+              <Button variant="secondary" className="h-8 w-8 p-0">
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => handleEdit(product)}
                 disabled={isSubmitting}
               >
@@ -264,16 +264,16 @@ export function ProductsTable() {
 
   const confirmDelete = async () => {
     if (!deleteProduct) return
-    
+
     try {
       setIsSubmitting(true)
       const { error } = await supabase
         .from("products")
         .delete()
         .eq("id", deleteProduct.id)
-      
+
       if (error) throw error
-      
+
       await fetchProducts() // Refresh the list
     } catch (err) {
       console.error("Error deleting product:", err)
@@ -310,7 +310,7 @@ export function ProductsTable() {
           <span className="block sm:inline">{error}</span>
         </div>
       )}
-      
+
       <div className="rounded-md border relative">
         {isLoading && (
           <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
