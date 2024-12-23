@@ -62,13 +62,19 @@ export function CustomersTable() {
 
       if (error) throw error
       
-      const mappedCustomers = (data || []).map(customer => ({
-        ...customer,
+      // Properly map the data to match Customer interface
+      const mappedCustomers: Customer[] = (data || []).map(customer => ({
+        id: customer.id,
+        full_name: customer.full_name,
+        email: customer.email,
+        address: customer.address || null,
+        phone: customer.phone || null,
+        created_at: customer.created_at,
         updated_at: customer.updated_at || customer.created_at
       }))
       
       setCustomers(mappedCustomers)
-y    } catch (err) {
+    } catch (err) {
       console.error("Error fetching customers:", err)
       setError(err instanceof Error ? err.message : "Failed to fetch customers")
     } finally {
@@ -82,7 +88,7 @@ y    } catch (err) {
 
   const columns: ColumnDef<Customer>[] = [
     {
-      accessorKey: "fullName",
+      accessorKey: "full_name", // Change from fullName to full_name
       header: ({ column }) => {
         return (
           <Button
