@@ -23,20 +23,15 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
+import { Product } from '@/types/product'
+
 export interface ProductFormProps {
   open: boolean
   onClose: () => void
   isLoading?: boolean
   setIsLoading?: (loading: boolean) => void
   onError?: (error: string) => void
-  product?: {
-    id: string
-    name: string
-    category: string
-    price: number
-    stock: number
-    status: "in-stock" | "low-stock" | "out-of-stock"
-  }
+  product?: Product
 }
 
 export function ProductForm({
@@ -48,20 +43,14 @@ export function ProductForm({
   product
 }: ProductFormProps) {
   const { toast } = useToast()
-  const [formData, setFormData] = useState<{
-    name: string;
-    category: string;
-    price: number;
-    stock: number;
-    image_url?: string;
-    status: "in-stock" | "low-stock" | "out-of-stock";
-  }>({
+  const [formData, setFormData] = useState<Partial<Product>>({
     name: product?.name || "",
     category: product?.category || "",
     price: product?.price || 0,
-    stock: product?.stock || 0,
-    image_url: product?.imagUrl || "",
-    status: product?.status || "in-stock"
+    stock_quantity: product?.stock_quantity || 0,
+    image_url: product?.image_url || "",
+    organic: product?.organic || false,
+    description: product?.description || ""
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
 
@@ -103,8 +92,9 @@ const handleSubmit = async (e: React.FormEvent) => {
       name: formData.name,
       category: formData.category,
       price: formData.price,
-      stock: formData.stock,
-      status,
+      stock_quantity: formData.stock_quantity,
+      organic: formData.organic,
+      description: formData.description,
       image_url,
       updated_at: new Date().toISOString()
     }
