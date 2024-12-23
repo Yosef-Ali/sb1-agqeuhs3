@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Customer } from "@/lib/supabase/types"
 import { DataTable } from "@/components/ui/data-table"
+
 import { columns } from "./columns"
 
 interface CustomersTableProps {
