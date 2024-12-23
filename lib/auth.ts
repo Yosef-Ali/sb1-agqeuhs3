@@ -1,18 +1,28 @@
-import { createServerComponentClient, type CookieOptions } from '@supabase/auth-helpers-nextjs'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
+import { type Database } from '@/types/database'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error('Missing Supabase environment variables')
-}
+export const createServerClient = cache(() => {
+  const cookieStore = cookies()
+  return createServerComponentClient<Database>({ cookies: () => cookieStore })
+})
 
 export async function auth() {
-  const cookieStore = cookies()
-  
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
-
+  const supabase = createServerClient()
   const { data: { session } } = await supabase.auth.getSession()
   return session
+}
+
+export async function requireAuth() {
+  const session = await auth()
+  if (!session) {
+    throw new Error('Authentication required')
+  }
+  return session
+}
+
+export async function getUser() {
+  const session = await auth()
+  return session?.user ?? null
 }
