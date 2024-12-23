@@ -32,7 +32,7 @@ export interface ProductFormProps {
   isLoading?: boolean
   setIsLoading?: (loading: boolean) => void
   onError?: (error: string) => void
-  product?: Product
+  product?: Product | null
 }
 
 export function ProductForm({
