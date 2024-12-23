@@ -85,11 +85,11 @@ export function ProductsTable() {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading]);
+  }, []); // Remove isLoading from dependencies
 
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   const columns: ColumnDef<Product>[] = [
     {
