@@ -1,3 +1,5 @@
+"use client"
+
 import { Suspense, useState } from "react"
 import { CustomerForm } from "@/components/dashboard/customers/customer-form"
 import { CustomersTable } from "@/components/dashboard/customers/customers-table"
@@ -7,10 +9,6 @@ import { Button } from "@/components/ui/button"
 import { PlusIcon } from "lucide-react"
 
 export const dynamic = "force-dynamic"
-
-"use client"
-
-import { useState } from "react"
 
 export default function CustomersPage() {
   const [showAddCustomer, setShowAddCustomer] = useState(false)
