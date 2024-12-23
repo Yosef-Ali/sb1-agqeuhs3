@@ -79,12 +79,17 @@ const handleSubmit = async (e: React.FormEvent) => {
 
         // Validate file type
         const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
-        if (!validTypes.includes(imageFile.type)) {
-          throw new Error('Please upload a valid image file (JPEG, PNG, or WebP)')
+        const validExtensions = ['jpg', 'jpeg', 'png', 'webp']
+        const fileExt = imageFile.name.split('.').pop()?.toLowerCase()
+        
+        if (!validTypes.includes(imageFile.type) || !fileExt || !validExtensions.includes(fileExt)) {
+          throw new Error('Please upload a valid image file (JPG, JPEG, PNG, or WebP)')
         }
 
-        const fileExt = imageFile.name.split('.').pop()?.toLowerCase()
-        const fileName = `${uuidv4()}.${fileExt}`
+        // Normalize extension to ensure consistency
+        let normalizedExt = fileExt
+        if (normalizedExt === 'jpg') normalizedExt = 'jpeg'
+        const fileName = `${uuidv4()}.${normalizedExt}`
         const filePath = `products/${fileName}` // Store in products subfolder
 
         // Upload the file
