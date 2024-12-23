@@ -41,7 +41,7 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_KEY!
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 type Product = {
-  id: string
+  id: stringproduc
   image: string
   name: string
   category: string
