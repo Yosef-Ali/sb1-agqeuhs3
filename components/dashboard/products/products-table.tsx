@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
@@ -34,6 +34,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { OrdersTablePagination } from "../orders/orders-pagination"
 import { ProductForm } from "./product-form"
+import { DeleteConfirmation } from "@/components/ui/delete-confirmation"
 import { supabase } from "@/lib/supabase/client"
 import { v4 as uuidv4 } from 'uuid'
 
@@ -63,6 +64,7 @@ export function ProductsTable() {
   const [showEditProduct, setShowEditProduct] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deleteProduct, setDeleteProduct] = useState<Product | null>(null)
 
   const fetchProducts = async () => {
     try {
@@ -256,15 +258,19 @@ export function ProductsTable() {
     }
   }
 
-  const handleDelete = async (product: Product) => {
-    if (!confirm("Are you sure you want to delete this product?")) return
+  const handleDelete = (product: Product) => {
+    setDeleteProduct(product)
+  }
+
+  const confirmDelete = async () => {
+    if (!deleteProduct) return
     
     try {
       setIsSubmitting(true)
       const { error } = await supabase
         .from("products")
         .delete()
-        .eq("id", product.id)
+        .eq("id", deleteProduct.id)
       
       if (error) throw error
       
@@ -274,6 +280,7 @@ export function ProductsTable() {
       setError(err instanceof Error ? err.message : "Failed to delete product")
     } finally {
       setIsSubmitting(false)
+      setDeleteProduct(null)
     }
   }
 
@@ -367,6 +374,14 @@ export function ProductsTable() {
           product={selectedProduct}
         />
       )}
+      <DeleteConfirmation
+        open={!!deleteProduct}
+        onClose={() => setDeleteProduct(null)}
+        onConfirm={confirmDelete}
+        title="Delete Product"
+        description="Are you sure you want to delete this product? This action cannot be undone."
+        loading={isSubmitting}
+      />
     </div>
   )
 }
