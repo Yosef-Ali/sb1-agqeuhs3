@@ -1,3 +1,4 @@
+import * as React from 'react'
 import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 import { LoginForm } from '@/components/auth/login-form'
