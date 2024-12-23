@@ -35,6 +35,7 @@ import { Button } from "@/components/ui/button"
 import { OrdersTablePagination } from "../orders/orders-pagination"
 import { ProductForm } from "./product-form"
 import { supabase } from "@/lib/supabase/client"
+import { v4 as uuidv4 } from 'uuid'
 
 type Product = {
   id: stringproduc
@@ -221,9 +222,34 @@ export function ProductsTable() {
     },
   ]
 
-  const handleEdit = (product: Product) => {
+  const handleEdit = async (product: Product) => {
     setSelectedProduct(product)
     setShowEditProduct(true)
+  }
+
+  const uploadImage = async (file: File): Promise<string> => {
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${uuidv4()}.${fileExt}`
+      const filePath = `${fileName}`
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file)
+
+      if (uploadError) {
+        throw uploadError
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath)
+
+      return publicUrl
+    } catch (error) {
+      console.error('Supabase storage error:', error)
+      throw new Error('Failed to upload image')
+    }
   }
 
   const handleDelete = async (product: Product) => {
