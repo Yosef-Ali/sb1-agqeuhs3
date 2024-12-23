@@ -357,6 +357,7 @@ export function ProductsTable() {
             No products found
           </div>
         ) : (
+          <>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -405,6 +406,8 @@ export function ProductsTable() {
             )}
           </TableBody>
         </Table>
+          </>
+        )}
       </div>
       <OrdersTablePagination table={table} />
       {showEditProduct && (
