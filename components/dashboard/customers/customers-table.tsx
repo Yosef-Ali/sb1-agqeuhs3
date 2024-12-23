@@ -181,7 +181,7 @@ export function CustomersTable() {
       sorting,
       columnFilters,
       columnVisibility,
-      rowSelection,
+      rowSelection: rowSelection as Record<string, boolean>,
     },
   })
 
