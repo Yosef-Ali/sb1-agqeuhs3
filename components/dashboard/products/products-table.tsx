@@ -69,6 +69,7 @@ export function ProductsTable() {
 
 
   const fetchProducts = useCallback(async () => {
+    if (isLoading) return; // Prevent multiple simultaneous requests
     try {
       setIsLoading(true);
       setError(null);
@@ -85,11 +86,11 @@ export function ProductsTable() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [isLoading]);
 
   useEffect(() => {
     fetchProducts();
-  }, [fetchProducts]);
+  }, []);
 
   const columns: ColumnDef<Product>[] = [
     {
