@@ -187,9 +187,11 @@ export function ProductsTable() {
         };
 
         return (
-          <Badge variant={getStatusColor(status)}>
-            {formatStatus(status)}
-          </Badge>
+          <div className="w-[100px]">
+            <Badge variant={getStatusColor(status)} className="w-full text-center">
+              {formatStatus(status)}
+            </Badge>
+          </div>
         )
       },
     },
@@ -342,7 +344,7 @@ export function ProductsTable() {
                   No products found
                 </div>
               ) : (
-                <Table>
+                <Table className="border">
               <TableHeader>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
@@ -369,7 +371,7 @@ export function ProductsTable() {
                       data-state={row.getIsSelected() && "selected"}
                     >
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id}>
+                        <TableCell key={cell.id} className="border">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
