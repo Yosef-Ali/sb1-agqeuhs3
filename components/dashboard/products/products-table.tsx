@@ -161,9 +161,17 @@ export function ProductsTable() {
       header: "Status",
       cell: ({ row }) => {
         const status = row.getValue("status") as string
+        const formatStatus = (text: string) => {
+          if (!text) return '';
+          return text
+            .split("-")
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(" ");
+        };
+        
         return (
           <Badge variant={getStatusColor(status)}>
-            {status.split("-").map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(" ")}
+            {formatStatus(status)}
           </Badge>
         )
       },
