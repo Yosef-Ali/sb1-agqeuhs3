@@ -8,7 +8,12 @@ export const metadata: Metadata = {
   description: "Example dashboard app built using the components.",
 }
 
+import { redirect } from 'next/navigation'
+import { requireAuth } from '@/lib/auth'
+
 export default async function DashboardPage() {
+  try {
+    await requireAuth()
   return (
     <div className="flex-1 space-y-4 p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
