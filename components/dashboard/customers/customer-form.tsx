@@ -55,10 +55,9 @@ export function CustomerForm({
   const form = useForm<CustomerFormValues>({
     resolver: zodResolver(customerFormSchema),
     defaultValues: {
-      full_name: customer?.full_name || "",
+      fullName: customer?.full_name || "",
       email: customer?.email || "",
       phone: customer?.phone || "",
-      address: customer?.address || "",
     },
   })
 

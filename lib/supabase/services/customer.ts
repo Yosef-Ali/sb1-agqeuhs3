@@ -19,7 +19,7 @@ export async function getCustomer(id: string) {
   const supabase = createServerClient()
   const { data: customer, error } = await supabase
     .from('customers')
-    .select('*')
+    .select('id, full_name, email, phone, address, created_at, updated_at')
     .eq('id', id)
     .single()
 
