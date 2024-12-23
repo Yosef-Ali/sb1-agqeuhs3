@@ -77,18 +77,26 @@ const handleSubmit = async (e: React.FormEvent) => {
           throw new Error('Image file size must be less than 5MB')
         }
 
-        // Validate file type
-        const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
-        const validExtensions = ['jpg', 'jpeg', 'png', 'webp']
+        // Validate file type and extension
+        const validTypes = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/jpg'])
+        const validExtensions = new Set(['jpg', 'jpeg', 'png', 'webp'])
         const fileExt = imageFile.name.split('.').pop()?.toLowerCase()
         
-        if (!validTypes.includes(imageFile.type) || !fileExt || !validExtensions.includes(fileExt)) {
-          throw new Error('Please upload a valid image file (JPG, JPEG, PNG, or WebP)')
+        // Special handling for jpg/jpeg
+        const isJpegType = imageFile.type === 'image/jpeg' || imageFile.type === 'image/jpg'
+        const isJpegExt = fileExt === 'jpg' || fileExt === 'jpeg'
+        
+        if ((!validTypes.has(imageFile.type) && !isJpegType) || 
+            (!fileExt || (!validExtensions.has(fileExt) && !isJpegExt))) {
+          throw new Error('Please upload a valid image file (JPG/JPEG, PNG, or WebP)')
         }
 
         // Normalize extension to ensure consistency
         let normalizedExt = fileExt
-        if (normalizedExt === 'jpg') normalizedExt = 'jpeg'
+        // Always normalize jpg/jpeg to jpg for consistency
+        if (isJpegType || isJpegExt) {
+          normalizedExt = 'jpg'
+        }
         const fileName = `${uuidv4()}.${normalizedExt}`
         const filePath = `products/${fileName}` // Store in products subfolder
 
