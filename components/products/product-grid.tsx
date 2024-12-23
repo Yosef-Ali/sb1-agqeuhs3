@@ -4,10 +4,26 @@ import { useProducts } from '@/hooks/use-products';
 import { ProductCard } from './product-card';
 
 export function ProductGrid() {
-  const { products, isLoading } = useProducts();
+  const { products, isLoading, error } = useProducts();
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <div className="text-center py-4">Loading products...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-4 text-red-500">
+        Error: {error}
+      </div>
+    );
+  }
+
+  if (products.length === 0) {
+    return (
+      <div className="text-center py-4">
+        No products found.
+      </div>
+    );
   }
 
   return (

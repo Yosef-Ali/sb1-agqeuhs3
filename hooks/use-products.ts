@@ -7,19 +7,25 @@ import { Product } from '@/types/product';
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const { data, error } = await supabase
+        setError(null);
+        const { data, error: supabaseError } = await supabase
           .from('products')
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (supabaseError) {
+          throw supabaseError;
+        }
+
         setProducts(data || []);
-      } catch (error) {
-        console.error('Error fetching products:', error);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch products');
       } finally {
         setIsLoading(false);
       }
@@ -28,5 +34,5 @@ export function useProducts() {
     fetchProducts();
   }, []);
 
-  return { products, isLoading };
+  return { products, isLoading, error };
 }
