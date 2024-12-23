@@ -12,17 +12,15 @@ export async function auth() {
   const supabase = createServerClient()
   const { data: { user }, error } = await supabase.auth.getUser()
   if (error || !user) return null
-  
-  const { data: { session } } = await supabase.auth.getSession()
-  return session
+  return user
 }
 
 export async function requireAuth() {
-  const session = await auth()
-  if (!session) {
+  const user = await auth()
+  if (!user) {
     redirect('/login')
   }
-  return session
+  return user
 }
 
 export async function signOut() {
@@ -31,6 +29,8 @@ export async function signOut() {
 }
 
 export async function getUser() {
-  const session = await auth()
-  return session?.user ?? null
+  const supabase = createServerClient()
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error) return null
+  return user
 }
