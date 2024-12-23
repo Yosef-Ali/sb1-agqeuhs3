@@ -41,7 +41,7 @@ import { format } from "date-fns"
 export function CustomersTable() {
   const [showEditCustomer, setShowEditCustomer] = useState(false)
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
-  const [customers, setCustomers] = useState<Customer[]>([])
+  const [customers, setCustomers] = useState<Array<Customer>>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
@@ -62,16 +62,7 @@ export function CustomersTable() {
 
       if (error) throw error
       
-      // Map the data to match the table structure
-      const formattedData = data?.map(customer => ({
-        id: customer.id,
-        name: customer.fullName,
-        email: customer.email,
-        phone: customer.phone,
-        created_at: customer.created_at
-      })) || []
-      
-      setCustomers(formattedData)
+      setCustomers(data || [])
     } catch (err) {
       console.error("Error fetching customers:", err)
       setError(err instanceof Error ? err.message : "Failed to fetch customers")
@@ -86,7 +77,7 @@ export function CustomersTable() {
 
   const columns: ColumnDef<Customer>[] = [
     {
-      accessorKey: "full_name",
+      accessorKey: "fullName",
       header: ({ column }) => {
         return (
           <Button
@@ -108,7 +99,7 @@ export function CustomersTable() {
       header: "Phone",
     },
     {
-      accessorKey: "created_at",
+      accessorKey: "createdAt",
       header: ({ column }) => {
         return (
           <Button

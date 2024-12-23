@@ -32,16 +32,12 @@ export function CustomerForm({
   setIsLoading,
   onError,
 }: CustomerFormProps) {
-  const [formData, setFormData] = useState<{
-    fullName: string;
-    email: string;
-    phone: string;
-  }>(customer ? {
-    fullName: customer.fullName || "",
-    email: customer.email || "",
-    phone: customer.phone || "",
+  const [formData, setFormData] = useState<Partial<Customer>>(customer ? {
+    fullName: customer.fullName,
+    email: customer.email,
+    phone: customer.phone,
   } : {
-    full_name: "",
+    fullName: "",
     email: "",
     phone: "",
   })
