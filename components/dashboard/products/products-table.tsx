@@ -61,22 +61,32 @@ const getStatusColor = (status: string) => {
 
 export function ProductsTable() {
   const [products, setProducts] = useState<Product[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [showEditProduct, setShowEditProduct] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const fetchProducts = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      const { data, error } = await supabase.from("products").select("*")
+      if (error) throw error
+      setProducts(data || [])
+    } catch (err) {
+      console.error("Error fetching products:", err)
+      setError(err instanceof Error ? err.message : "Failed to fetch products")
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      const { data, error } = await supabase.from("products").select("*")
-      if (error) {
-        console.error("Error fetching products:", error)
-      } else {
-        setProducts(data)
-      }
-    }
     fetchProducts()
   }, [])
 
@@ -191,14 +201,18 @@ export function ProductsTable() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => handleEdit(product)}>
+              <DropdownMenuItem 
+                onClick={() => handleEdit(product)}
+                disabled={isSubmitting}
+              >
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
                 onClick={() => handleDelete(product)}
                 className="text-red-600"
+                disabled={isSubmitting}
               >
-                Delete
+                {isSubmitting ? 'Deleting...' : 'Delete'}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -213,11 +227,23 @@ export function ProductsTable() {
   }
 
   const handleDelete = async (product: Product) => {
-    const { error } = await supabase.from("products").delete().eq("id", product.id)
-    if (error) {
-      console.error("Error deleting product:", error)
-    } else {
-      setProducts(products.filter(p => p.id !== product.id))
+    if (!confirm("Are you sure you want to delete this product?")) return
+    
+    try {
+      setIsSubmitting(true)
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", product.id)
+      
+      if (error) throw error
+      
+      await fetchProducts() // Refresh the list
+    } catch (err) {
+      console.error("Error deleting product:", err)
+      setError(err instanceof Error ? err.message : "Failed to delete product")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -242,7 +268,18 @@ export function ProductsTable() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+          <span className="block sm:inline">{error}</span>
+        </div>
+      )}
+      
+      <div className="rounded-md border relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        )}
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
