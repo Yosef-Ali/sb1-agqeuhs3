@@ -317,13 +317,16 @@ export function ProductsTable() {
         </div>
       )}
 
-      <div className="rounded-md border relative min-h-[400px]">
+      <div className="relative min-h-[400px]">
         {isLoading ? (
-          <div className="w-full space-y-3">
+          <div className="w-full space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center space-x-4">
+              <div key={i} className="flex items-center space-x-4 w-full">
                 <Skeleton className="h-12 w-12" />
-                <Skeleton className="h-12 w-[80%]" />
+                <Skeleton className="h-12 flex-1" />
+                <Skeleton className="h-12 w-24" />
+                <Skeleton className="h-12 w-24" />
+                <Skeleton className="h-12 w-24" />
               </div>
             ))}
           </div>
