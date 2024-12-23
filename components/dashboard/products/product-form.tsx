@@ -69,26 +69,52 @@ const handleSubmit = async (e: React.FormEvent) => {
     
     if (imageFile) {
       try {
-        const fileExt = imageFile.name.split('.').pop()
-        const fileName = `${uuidv4()}.${fileExt}`
-        const filePath = `${fileName}`
-
-        const { error: uploadError, data } = await supabase.storage
-          .from('product-images')
-          .upload(filePath, imageFile)
-
-        if (uploadError) {
-          throw uploadError
+        // Validate file size (max 5MB)
+        if (imageFile.size > 5 * 1024 * 1024) {
+          throw new Error('Image file size must be less than 5MB')
         }
 
+        // Validate file type
+        const validTypes = ['image/jpeg', 'image/png', 'image/webp']
+        if (!validTypes.includes(imageFile.type)) {
+          throw new Error('Please upload a valid image file (JPEG, PNG, or WebP)')
+        }
+
+        const fileExt = imageFile.name.split('.').pop()?.toLowerCase()
+        const fileName = `${uuidv4()}.${fileExt}`
+        const filePath = `products/${fileName}` // Store in products subfolder
+
+        // Upload the file
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, imageFile, {
+            cacheControl: '3600',
+            upsert: false
+          })
+
+        if (uploadError) {
+          console.error('Storage upload error:', uploadError)
+          throw new Error(`Upload failed: ${uploadError.message}`)
+        }
+
+        // Get the public URL
         const { data: { publicUrl } } = supabase.storage
           .from('product-images')
           .getPublicUrl(filePath)
 
+        if (!publicUrl) {
+          throw new Error('Failed to get public URL for uploaded image')
+        }
+
         finalImageUrl = publicUrl
-      } catch (uploadError) {
-        console.error('Image upload error:', uploadError)
-        throw new Error('Failed to upload image')
+      } catch (error) {
+        console.error('Image upload error:', error)
+        toast({
+          title: "Image Upload Failed",
+          description: error instanceof Error ? error.message : 'Failed to upload image',
+          variant: "destructive",
+        })
+        throw error
       }
     }
 
