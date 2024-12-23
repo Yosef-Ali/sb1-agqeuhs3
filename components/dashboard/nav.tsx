@@ -33,6 +33,12 @@ export function DashboardNav({ user }: DashboardNavProps) {
             >
               Products
             </Link>
+            <Link
+              href="/dashboard/customers"
+              className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+            >
+              Customers
+            </Link>
           </nav>
         </div>
         <div className="ml-auto flex items-center space-x-4">
