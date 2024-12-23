@@ -58,12 +58,20 @@ export function CustomersTable() {
       const { data, error } = await supabase
         .from("customers")
         .select("*")
-        .order('createdAt', { ascending: false })
+        .order('created_at', { ascending: false })
 
       if (error) throw error
       
-      setCustomers(data || [])
-    } catch (err) {
+      const mappedCustomers = (data || []).map(customer => ({
+        id: customer.id,
+        full_name: customer.full_name,
+        address: customer.address,
+        phone: customer.phone,
+        created_at: customer.created_at
+      }))
+      
+      setCustomers(mappedCustomers)
+y    } catch (err) {
       console.error("Error fetching customers:", err)
       setError(err instanceof Error ? err.message : "Failed to fetch customers")
     } finally {
