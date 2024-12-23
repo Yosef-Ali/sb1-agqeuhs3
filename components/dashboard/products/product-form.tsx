@@ -53,10 +53,13 @@ export function ProductForm({
     organic: product?.organic || false,
     description: product?.description || ""
   })
+  const [submitting, setSubmitting] = useState(false)
   const [imageFile, setImageFile] = useState<File | null>(null)
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault()
+  if (submitting) return // Prevent double submission
+  setSubmitting(true)
   setIsLoading(true)
   
   try {
@@ -199,6 +202,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     onError(errorMessage)
   } finally {
     setIsLoading(false)
+    setSubmitting(false)
   }
 }
 
@@ -286,8 +290,8 @@ const handleSubmit = async (e: React.FormEvent) => {
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save"}
+            <Button type="submit" disabled={submitting}>
+              {submitting ? "Saving..." : "Save"}
             </Button>
           </div>
         </form>
