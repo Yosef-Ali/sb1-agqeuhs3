@@ -128,7 +128,7 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                 ))}
               </div>
             ) : (
-              {items.length === 0 ? (
+              items.length === 0 ? (
                 <div className="flex h-[400px] flex-col items-center justify-center space-y-2">
                   <ShoppingCart className="h-12 w-12 text-gray-400" />
                   <p className="text-lg font-medium text-gray-900">Your cart is empty</p>
