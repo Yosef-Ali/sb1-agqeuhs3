@@ -18,7 +18,8 @@ interface CheckoutDisplayProps {
 export function CheckoutDisplay({
   items,
   subtotal,
-  clearCart
+  clearCart,
+  onBack
 }: CheckoutDisplayProps) {
   const [showPOSReceipt, setShowPOSReceipt] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
