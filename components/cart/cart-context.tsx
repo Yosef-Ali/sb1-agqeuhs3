@@ -99,7 +99,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
 export function useCart() {
   const context = useContext(CartContext)
   if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider")
+    throw new Error(
+      "useCart hook must be used within a CartProvider component. " +
+      "Wrap your component tree with <CartProvider>...</CartProvider>"
+    )
   }
   return context
 }
