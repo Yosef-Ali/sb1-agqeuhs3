@@ -61,18 +61,16 @@ export function OrdersGrid({ data }: OrdersGridProps) {
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg border-none p-0">
           <SheetHeader className="px-6 py-4 border-b">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col items-center gap-2">
               <SheetTitle>Shopping Cart ({totalItems})</SheetTitle>
-              <div className="flex items-center gap-2">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  onClick={clearCart}
-                  className="h-8 px-3"
-                >
-                  Clear Cart
-                </Button>
-              </div>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearCart}
+                className="h-8 px-3"
+              >
+                Clear Cart
+              </Button>
             </div>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto">
