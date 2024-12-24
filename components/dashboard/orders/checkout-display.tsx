@@ -38,11 +38,6 @@ export function CheckoutDisplay({
       setIsProcessing(true)
       setError(null)
 
-      // Validate phone number
-      if (!phoneNumber || phoneNumber.length < 10) {
-        throw new Error("Please enter a valid phone number")
-      }
-
       // Process checkout logic here
       await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
 
@@ -142,7 +137,7 @@ export function CheckoutDisplay({
         className="w-full"
         size="lg"
         onClick={handleCheckout}
-        disabled={isProcessing || !phoneNumber}
+        disabled={isProcessing}
       >
         {isProcessing ? "Processing..." : "Checkout"}
       </Button>
