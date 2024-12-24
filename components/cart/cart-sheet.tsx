@@ -179,17 +179,19 @@ export function CartSheet() {
                   </div>
                 )}
                 
-                <div className="p-4 bg-white">
-                  <Button
-                    size="lg"
-                    onClick={() => setShowCheckout(true)}
-                    disabled={items.length === 0}
-                    className="w-full bg-primary hover:bg-primary/90 text-white"
-                  >
-                    {items.length === 0 
-                      ? 'Your cart is empty'
-                      : `Checkout • $${finalTotal.toFixed(2)}`}
-                  </Button>
+                <div className="border-t p-6">
+                  <div className="flex gap-4">
+                    <Button
+                      size="lg"
+                      onClick={() => setShowCheckout(true)}
+                      disabled={items.length === 0}
+                      className="flex-1 bg-primary hover:bg-primary/90 text-white"
+                    >
+                      {items.length === 0 
+                        ? 'Your cart is empty'
+                        : `Checkout • $${finalTotal.toFixed(2)}`}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
