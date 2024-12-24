@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { ShoppingCart, Minus, Plus, Trash2 } from "lucide-react"
 import { CheckoutDisplay } from "./checkout-display"
-import { CartSheet } from "../cart/cart-sheet"
+import { CartSheet } from "@/components/cart/cart-sheet"
 import { useCartStore } from "@/lib/store/cart-store"
 
 type Order = {
