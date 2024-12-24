@@ -62,7 +62,7 @@ export function OrdersGrid({ data }: OrdersGridProps) {
             <SheetTitle className="text-xl font-semibold">Cart ({totalItems})</SheetTitle>
           </SheetHeader>
           <div className="flex h-full flex-col">
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)" }}>
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4 p-6 border-b">
                   <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
