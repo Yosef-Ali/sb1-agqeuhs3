@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart, Minus, Plus } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
-import { useCartStore } from "@/lib/store/cart-store"
+import { useCartStore, useCartTotals } from "@/lib/store/cart-store"
 import { Separator } from "@/components/ui/separator"
 
 type Order = {
