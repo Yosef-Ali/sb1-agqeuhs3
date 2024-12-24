@@ -11,6 +11,7 @@ interface CheckoutDisplayProps {
   items: CartItem[]
   subtotal: number
   clearCart: () => void
+  onBack: () => void
 }
 
 export function CheckoutDisplay({
@@ -39,6 +40,19 @@ export function CheckoutDisplay({
 
   return (
     <div className="flex flex-col h-full">
+      <SheetHeader className="px-6 py-4 border-b">
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onBack}
+            className="mr-2"
+          >
+            ←
+          </Button>
+          <SheetTitle>Checkout</SheetTitle>
+        </div>
+      </SheetHeader>
       <div className="flex-1 p-6 space-y-4">
         <div className="text-center space-y-2">
           <h2 className="font-bold text-xl">RECEIPT</h2>
