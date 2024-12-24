@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart, Minus, Plus } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
-import { useCart } from "@/components/cart/cart-context"
+import { useCartStore } from "@/lib/store/cart-store"
 import { Separator } from "@/components/ui/separator"
 
 type Order = {
@@ -48,10 +48,9 @@ export function OrdersGrid({ data }: OrdersGridProps) {
     updateQuantity, 
     clearCart,
     isOpen, 
-    setIsOpen,
-    totalItems,
-    subtotal 
-  } = useCart()
+    setIsOpen 
+  } = useCartStore()
+  const { totalItems, subtotal } = useCartTotals()
 
   return (
     <div className="relative">

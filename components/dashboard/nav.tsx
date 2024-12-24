@@ -4,14 +4,15 @@ import Link from "next/link"
 import { User } from "@supabase/supabase-js"
 import { Button } from "@/components/ui/button"
 import { ShoppingCart } from "lucide-react"
-import { useCart, CartProvider } from "@/components/cart/cart-context"
+import { useCartStore, useCartTotals } from "@/lib/store/cart-store"
 
 interface DashboardNavProps {
   user: User | null
 }
 
-function DashboardNavContent({ user }: DashboardNavProps) {
-  const { totalItems, setIsOpen } = useCart()
+export function DashboardNav({ user }: DashboardNavProps) {
+  const setIsOpen = useCartStore((state) => state.setIsOpen)
+  const { totalItems } = useCartTotals()
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center">
@@ -71,13 +72,5 @@ function DashboardNavContent({ user }: DashboardNavProps) {
         </div>
       </div>
     </header>
-  )
-}
-
-export function DashboardNav(props: DashboardNavProps) {
-  return (
-    <CartProvider>
-      <DashboardNavContent {...props} />
-    </CartProvider>
   )
 }
