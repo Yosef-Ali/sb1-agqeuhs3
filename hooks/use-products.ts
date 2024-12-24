@@ -25,12 +25,22 @@ export function useProducts() {
         setIsLoading(true);
         setError(null);
         
+        console.log('📡 Calling Supabase products.select()');
         const { data, error: supabaseError } = await supabase
           .from('products')
           .select('*')
           .order('created_at', { ascending: false });
 
-        if (supabaseError) throw supabaseError;
+        if (supabaseError) {
+          console.error('❌ Supabase error:', supabaseError);
+          throw supabaseError;
+        }
+
+        console.log('✅ API Success:', {
+          productsCount: data?.length || 0,
+          firstProduct: data?.[0],
+          timestamp: new Date().toISOString()
+        });
 
         // Update cache
         productsCache.data = data || [];
@@ -56,10 +66,16 @@ export function useProducts() {
         // Check cache first
         const now = Date.now();
         if (productsCache.data && (now - productsCache.timestamp) < CACHE_TTL) {
+          console.log('📦 Cache hit:', {
+            cacheAge: Math.round((now - productsCache.timestamp) / 1000) + 's',
+            products: productsCache.data.length,
+            timestamp: new Date().toISOString()
+          });
           setProducts(productsCache.data);
           setIsLoading(false);
           return;
         }
+        console.log('🔍 Cache miss or expired, fetching fresh data');
 
         setIsLoading(true);
         setError(null);
