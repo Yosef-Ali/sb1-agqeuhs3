@@ -3,10 +3,10 @@
 import { useState } from "react"
 import { ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { useCartStore, useCartTotals } from "@/lib/store/cart-store"
-import { CheckoutDisplay } from "../dashboard/orders/checkout-display"
 import { CartItem } from "./cart-item"
+import { CheckoutDisplay } from "./checkout-display"
 
 export function CartSheet() {
   const {
@@ -18,8 +18,6 @@ export function CartSheet() {
     setIsOpen
   } = useCartStore()
   const { totalItems, subtotal } = useCartTotals()
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [showReceipt, setShowReceipt] = useState(false)
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -60,21 +58,15 @@ export function CartSheet() {
           </div>
           {items.length > 0 && (
             <div className="border-t bg-white sticky bottom-0">
-              <div className="p-6 space-y-4">
-                <CheckoutDisplay
-                  items={items}
-                  subtotal={subtotal}
-                  phoneNumber={phoneNumber}
-                  setPhoneNumber={setPhoneNumber}
-                  showReceipt={showReceipt}
-                  setShowReceipt={setShowReceipt}
-                  onNewOrder={() => {
-                    clearCart()
-                    setIsOpen(false)
-                  }}
-                  clearCart={clearCart}
-                />
-              </div>
+              <CheckoutDisplay
+                items={items}
+                subtotal={subtotal}
+                onNewOrder={() => {
+                  clearCart()
+                  setIsOpen(false)
+                }}
+                clearCart={clearCart}
+              />
             </div>
           )}
         </div>
