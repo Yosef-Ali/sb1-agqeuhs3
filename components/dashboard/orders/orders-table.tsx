@@ -30,11 +30,11 @@ import { OrdersTablePagination } from "./orders-pagination"
 const getStatusColor = (status: string) => {
   switch (status) {
     case "pending":
-      return "warning" as const
+      return "secondary" as const
     case "processing":
       return "default" as const
     case "completed":
-      return "success" as const
+      return "secondary" as const
     case "cancelled":
       return "destructive" as const
     default:
