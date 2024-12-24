@@ -134,43 +134,48 @@ export function OrdersGrid({ data }: OrdersGridProps) {
             )}
           </div>
           {items.length > 0 && (
-            <div className="border-t p-6 space-y-4">
-              <div className="space-y-4">
-                <Input
-                  type="tel"
-                  placeholder="Phone Number"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                />
-                <Input
-                  type="text"
-                  placeholder="Coupon Code (Optional)"
-                  className="w-full"
-                />
+            <div className="flex flex-col h-full">
+              <div className="flex-1 overflow-y-auto">
+                {/* Cart items will scroll here */}
               </div>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span>Subtotal</span>
-                  <span>{new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD"
-                  }).format(subtotal)}</span>
+              <div className="border-t mt-auto p-6 space-y-4 bg-white">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <Input
+                    type="tel"
+                    placeholder="Phone Number"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                  />
+                  <Input
+                    type="text"
+                    placeholder="Coupon Code (Optional)"
+                    className="w-full"
+                  />
                 </div>
-                <div className="flex justify-between font-medium">
-                  <span>Total</span>
-                  <span>{new Intl.NumberFormat("en-US", {
-                    style: "currency",
-                    currency: "USD"
-                  }).format(subtotal)}</span>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span>{new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD"
+                    }).format(subtotal)}</span>
+                  </div>
+                  <div className="flex justify-between font-medium">
+                    <span>Total</span>
+                    <span>{new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD"
+                    }).format(subtotal)}</span>
+                  </div>
                 </div>
+                <Button 
+                  className="w-full" 
+                  size="lg" 
+                  onClick={() => setShowReceipt(true)}
+                >
+                  Proceed to Checkout
+                </Button>
               </div>
-              <Button 
-                className="w-full" 
-                size="lg" 
-                onClick={() => setShowReceipt(true)}
-              >
-                Proceed to Checkout
-              </Button>
             </div>
           )}
         </SheetContent>
