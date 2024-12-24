@@ -29,7 +29,7 @@ export function CheckoutDisplay({
   const handleCheckout = async () => {
     try {
       setIsProcessing(true)
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000)) {/* Simulate API call */}
       setShowPOSReceipt(true)
       clearCart()
       toast.success("Order placed successfully!")
