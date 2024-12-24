@@ -5,7 +5,7 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ShoppingCart, Minus, Plus } from "lucide-react"
+import { ShoppingCart, Minus, Plus, Trash2 } from "lucide-react"
 import { CheckoutDisplay } from "./checkout-display"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
 import { useCartStore, useCartTotals } from "@/lib/store/cart-store"
@@ -61,15 +61,15 @@ export function OrdersGrid({ data }: OrdersGridProps) {
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg border-none p-0">
           <SheetHeader className="px-6 py-4 border-b">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
               <SheetTitle>Shopping Cart ({totalItems})</SheetTitle>
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={clearCart}
-                className="h-8 px-3"
+                className="h-8 w-8"
               >
-                Clear Cart
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
           </SheetHeader>
@@ -100,7 +100,7 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                           {new Intl.NumberFormat("en-US", {
                             style: "currency",
                             currency: "USD",
-                          }).format(item.total * item.quantity)}
+                          }).format(Number(item.total) * item.quantity)}
                         </p>
                       </div>
                       <p className="mt-1 text-sm text-gray-500">Order ID: {item.id}</p>
@@ -181,9 +181,9 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                     }).format(subtotal)}</span>
                   </div>
                 </div>
-                <Button 
-                  className="w-full" 
-                  size="lg" 
+                <Button
+                  className="w-full"
+                  size="lg"
                   onClick={() => setShowReceipt(true)}
                 >
                   Proceed to Checkout
