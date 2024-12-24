@@ -143,7 +143,10 @@ export function OrdersGrid({ data }: OrdersGridProps) {
             onMouseEnter={() => setHoveredItem(order.id)}
             onMouseLeave={() => setHoveredItem(null)}
           >
-            <div className="aspect-square overflow-hidden">
+            <button 
+              onClick={() => addToCart(order)}
+              className="w-full aspect-square overflow-hidden"
+            >
               <Image
                 src={order.image || "/placeholder.png"}
                 alt={`Order ${order.id}`}
@@ -164,14 +167,14 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                       currency: "USD",
                     }).format(order.total)}
                   </p>
-                  <Button size="sm" className="w-full">
-                    <ShoppingCart className="w-4 h-4 mr-2" />
+                  <div className="w-full flex items-center justify-center">
+                    <ShoppingCart className="w-5 h-5 mr-2" />
                     Add to Cart
-                  </Button>
+                  </div>
                 </div>
               )}
-            </div>
-            <p className="text-sm text-center text-gray-500">Click to view details</p>
+            </button>
+            <p className="text-sm text-center text-gray-500 py-2">Click image to add to cart</p>
           </div>
         ))}
       </div>
