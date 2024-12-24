@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState } from "react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
+import { useProducts } from "@/hooks/use-products"
 import { ArrowUpDown, MoreHorizontal } from "lucide-react"
 import {
   DropdownMenu,
@@ -55,9 +56,7 @@ const getStatusColor = (status: string) => {
 }
 
 export function ProductsTable() {
-  const [products, setProducts] = useState<Product[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const { products, isLoading, error, refreshProducts } = useProducts()
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -68,28 +67,6 @@ export function ProductsTable() {
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null)
 
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setProducts(data || []);
-    } catch (err) {
-      console.error("Error fetching products:", err);
-      setError(err instanceof Error ? err.message : "Failed to fetch products");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []); // Remove isLoading from dependencies
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
 
   const columns: ColumnDef<Product>[] = [
     {
@@ -238,7 +215,7 @@ export function ProductsTable() {
   const handleFormClose = async () => {
     setShowEditProduct(false)
     setSelectedProduct(null)
-    await fetchProducts() // Refresh the products list
+    await refreshProducts() // Refresh the products list using the hook's refresh function
   }
 
   const uploadImage = async (file: File): Promise<string> => {
