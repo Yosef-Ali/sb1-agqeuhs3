@@ -13,13 +13,15 @@ interface CheckoutDisplayProps {
   subtotal: number
   clearCart: () => void
   onBack: () => void
+  phone: string
 }
 
 export function CheckoutDisplay({
   items,
   subtotal,
   clearCart,
-  onBack
+  onBack,
+  phone
 }: CheckoutDisplayProps) {
   const [showPOSReceipt, setShowPOSReceipt] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
@@ -29,7 +31,7 @@ export function CheckoutDisplay({
   const handleCheckout = async () => {
     try {
       setIsProcessing(true)
-      await new Promise(resolve => setTimeout(resolve, 1000)) {/* Simulate API call */}
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
       setShowPOSReceipt(true)
       clearCart()
       toast.success("Order placed successfully!")
@@ -60,6 +62,7 @@ export function CheckoutDisplay({
           <h2 className="font-bold text-xl">RECEIPT</h2>
           <p className="text-sm text-gray-500">Order #{orderNumber}</p>
           <p className="text-sm text-gray-500">{currentDate}</p>
+          <p className="text-sm text-gray-500">Phone: {phone}</p>
         </div>
 
         <Separator />
