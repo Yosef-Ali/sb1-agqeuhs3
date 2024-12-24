@@ -179,7 +179,7 @@ export function OrdersGrid({ data }: OrdersGridProps) {
             onMouseLeave={() => setHoveredItem(null)}
           >
             <button 
-              onClick={() => addToCart(order)}
+              onClick={() => addItem(order)}
               className="w-full aspect-square overflow-hidden"
             >
               <Image
