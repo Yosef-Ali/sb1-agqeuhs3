@@ -127,7 +127,15 @@ export const columns: ColumnDef<Order>[] = [
   },
 ]
 
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { OrdersGrid } from "./orders-grid"
+
 export function OrdersTable() {
+  // Add sample image URLs to the data
+  const dataWithImages = data.map(order => ({
+    ...order,
+    image: `/products/${order.id}.jpg` // You'll need to add actual product images
+  }))
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -154,7 +162,16 @@ export function OrdersTable() {
 
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
+      <Tabs defaultValue="grid" className="w-full">
+        <TabsList>
+          <TabsTrigger value="grid">Grid View</TabsTrigger>
+          <TabsTrigger value="table">Table View</TabsTrigger>
+        </TabsList>
+        <TabsContent value="grid">
+          <OrdersGrid data={dataWithImages} />
+        </TabsContent>
+        <TabsContent value="table">
+          <div className="rounded-md border">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -205,6 +222,9 @@ export function OrdersTable() {
         </Table>
       </div>
       <OrdersTablePagination table={table} />
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
