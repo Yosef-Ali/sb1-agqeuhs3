@@ -3,7 +3,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { CartState, CartItem } from '@/types/cart'
-import { Product } from '@/types/database'
+import { Product } from '@/lib/supabase/types'
 
 interface CartStore extends CartState {
   addItem: (product: Product) => void
