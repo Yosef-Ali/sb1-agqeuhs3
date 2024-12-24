@@ -59,17 +59,19 @@ export function CheckoutDisplay({
   }
   if (showReceipt) {
     return (
-      <div className="border-t">
+      <div className="flex flex-col h-full">
         <SheetHeader className="px-6 py-4 border-b">
-          <SheetTitle>Print or Share Receipt</SheetTitle>
+          <SheetTitle>Order Receipt</SheetTitle>
         </SheetHeader>
-        <div className="p-6">
+        <div className="flex-1 p-6 overflow-y-auto">
           <Receipt 
             items={items}
             subtotal={subtotal}
             phoneNumber={phoneNumber}
           />
-          <div className="flex gap-2 mt-4">
+        </div>
+        <div className="p-6 border-t">
+          <div className="flex gap-2">
             <Button 
               className="flex-1" 
               onClick={() => window.print()}
