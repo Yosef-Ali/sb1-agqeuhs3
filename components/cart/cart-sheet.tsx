@@ -11,7 +11,7 @@ import {
   SheetTitle
 } from "@/components/ui/sheet"
 import { useCartStore, useCartTotals } from "@/lib/store/cart-store"
-import { CartItem } from "@/types/cart"
+import { CartItem } from "@/types/cart"  // Use the shared type
 import { CartItem as CartItemComponent } from "./cart-item"
 import { CheckoutDisplay } from "./checkout-display"
 import { Separator } from "../ui/separator"
@@ -65,7 +65,7 @@ export function CartSheet() {
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
-      <SheetContent side="right" className="w-full sm:max-w-lg border-none p-0">
+      <SheetContent side="right" className="w-full sm:max-w-lg border-none p-0 flex flex-col">
         {!showCheckout ? (
           <>
             <SheetHeader className="px-6 py-4 border-b">
@@ -81,8 +81,8 @@ export function CartSheet() {
                 </Button>
               </div>
             </SheetHeader>
-            <div className="flex flex-col h-full">
-              <div className="flex-1 overflow-y-auto pb-32"> {/* Add bottom padding */}
+            <div className="flex flex-col h-[calc(100vh-4rem)]"> {/* Fixed height calculation */}
+              <div className="flex-1 overflow-y-auto">
                 {items.length === 0 ? (
                   <div className="flex h-[400px] flex-col items-center justify-center space-y-2">
                     <ShoppingCart className="h-12 w-12 text-gray-400" />
@@ -101,93 +101,90 @@ export function CartSheet() {
                     ))}
                   </div>
                 )}
-              </div>
-              <Separator />
-              <div className="p-4 flex items-center justify-between bg-gray-50">
-                <p className="text-sm font-medium">Subtotal</p>
-                <p className="font-medium text-lg">${subtotal.toFixed(2)}</p>
-              </div>
-              <Separator />
 
-              {items.length > 0 && (
-                <div className="p-4 space-y-6">
-                  {/* Coupon Section */}
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Have a coupon?</p>
-                    <div className="flex gap-2">
-                      <Input
-                        type="text"
-                        placeholder="Enter coupon code"
-                        value={coupon}
-                        onChange={(e) => setCoupon(e.target.value)}
-                        className="flex-1"
-                      />
-                      <Button
-                        variant="outline"
-                        onClick={handleApplyCoupon}
-                        disabled={!coupon || isApplying}
-                      >
-                        {isApplying ? (
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        ) : (
-                          'Apply'
+                {items.length > 0 && (
+                  <>
+                    <Separator />
+                    <div className="p-4 space-y-6">
+                      {/* Coupon and Customer Information sections */}
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Have a coupon?</p>
+                        <div className="flex gap-2">
+                          <Input
+                            type="text"
+                            placeholder="Enter coupon code"
+                            value={coupon}
+                            onChange={(e) => setCoupon(e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button
+                            variant="outline"
+                            onClick={handleApplyCoupon}
+                            disabled={!coupon || isApplying}
+                          >
+                            {isApplying ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              'Apply'
+                            )}
+                          </Button>
+                        </div>
+                        {discount > 0 && (
+                          <p className="text-sm text-green-600">
+                            Coupon applied! You saved ${discount.toFixed(2)}
+                          </p>
                         )}
-                      </Button>
+                      </div>
+
+                      {/* Customer Information */}
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">Contact Information</p>
+                        <Input
+                          type="tel"
+                          placeholder="Phone number"
+                          value={phone}
+                          onChange={(e) => {
+                            setPhone(e.target.value)
+                            setError("")
+                          }}
+                          className={error ? "border-red-500" : ""}
+                        />
+                        {error && (
+                          <p className="text-sm text-red-500">{error}</p>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Fixed bottom section */}
+              <div className="mt-auto border-t">
+                {items.length > 0 && (
+                  <div className="p-4 bg-gray-50 border-b">
+                    <div className="flex justify-between text-sm mb-2">
+                      <span>Subtotal</span>
+                      <span>${subtotal.toFixed(2)}</span>
                     </div>
                     {discount > 0 && (
-                      <p className="text-sm text-green-600">
-                        Coupon applied! You saved ${discount.toFixed(2)}
-                      </p>
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>Discount</span>
+                        <span>-${discount.toFixed(2)}</span>
+                      </div>
                     )}
-                  </div>
-
-                  {/* Customer Information */}
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Contact Information</p>
-                    <Input
-                      type="tel"
-                      placeholder="Phone number"
-                      value={phone}
-                      onChange={(e) => {
-                        setPhone(e.target.value)
-                        setError("")
-                      }}
-                      className={error ? "border-red-500" : ""}
-                    />
-                    {error && (
-                      <p className="text-sm text-red-500">{error}</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Order Summary */}
-              {items.length > 0 && (
-                <div className="border-t p-4 space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
-                  </div>
-                  {discount > 0 && (
-                    <div className="flex justify-between text-sm text-green-600">
-                      <span>Discount</span>
-                      <span>-${discount.toFixed(2)}</span>
+                    <div className="flex justify-between font-medium pt-2 border-t">
+                      <span>Total</span>
+                      <span>${finalTotal.toFixed(2)}</span>
                     </div>
-                  )}
-                  <div className="flex justify-between font-medium pt-2 border-t">
-                    <span>Total</span>
-                    <span>${finalTotal.toFixed(2)}</span>
                   </div>
-                </div>
-              )}
-
-              <div className="border-t bg-white sticky bottom-0 p-4">
-                <div className="flex gap-4">
+                )}
+                
+                <div className="p-4 bg-white">
                   <Button
                     size="lg"
                     onClick={() => setShowCheckout(true)}
                     disabled={items.length === 0}
-                    className="flex-1 bg-primary hover:bg-primary/90 text-white"
+                    className="w-full bg-primary hover:bg-primary/90 text-white"
                   >
                     {items.length === 0 
                       ? 'Your cart is empty'
