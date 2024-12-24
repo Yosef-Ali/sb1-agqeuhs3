@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator"
 import { SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Printer, Share } from "lucide-react"
 import { Receipt } from "./receipt"
+import { toast } from "sonner"
 
 interface CheckoutDisplayProps {
   items: CartItem[]
@@ -36,7 +37,7 @@ export function CheckoutDisplay({
     try {
       setIsProcessing(true)
       setError(null)
-      
+
       // Validate phone number
       if (!phoneNumber || phoneNumber.length < 10) {
         throw new Error("Please enter a valid phone number")
@@ -44,7 +45,7 @@ export function CheckoutDisplay({
 
       // Process checkout logic here
       await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
-      
+
       onNewOrder()
       setShowReceipt(true)
       toast.success("Order placed successfully!")
@@ -65,7 +66,7 @@ export function CheckoutDisplay({
           <SheetTitle>Order Receipt</SheetTitle>
         </SheetHeader>
         <div className="flex-1 p-6 overflow-y-auto">
-          <Receipt 
+          <Receipt
             items={items}
             subtotal={subtotal}
             phoneNumber={phoneNumber}
@@ -73,8 +74,8 @@ export function CheckoutDisplay({
         </div>
         <div className="p-6 border-t">
           <div className="flex gap-2">
-            <Button 
-              className="flex-1" 
+            <Button
+              className="flex-1"
               onClick={() => window.print()}
               variant="outline"
             >
@@ -137,8 +138,8 @@ export function CheckoutDisplay({
           }).format(subtotal)}</span>
         </div>
       </div>
-      <Button 
-        className="w-full" 
+      <Button
+        className="w-full"
         size="lg"
         onClick={handleCheckout}
         disabled={isProcessing || !phoneNumber}
