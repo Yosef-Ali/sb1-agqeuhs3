@@ -37,46 +37,47 @@ export function CartSheet() {
             </Button>
           </div>
         </SheetHeader>
-        <div className="flex-1 overflow-y-auto">
-          {items.length === 0 ? (
-            <div className="flex h-[400px] flex-col items-center justify-center space-y-2">
-              <ShoppingCart className="h-12 w-12 text-gray-400" />
-              <p className="text-lg font-medium text-gray-900">Your cart is empty</p>
-              <p className="text-gray-500">Add items to get started.</p>
-            </div>
-          ) : (
-            <div className="divide-y">
-              {items.map((item) => (
-                <CartItem
-                  key={item.id}
-                  {...item}
-                  onUpdateQuantity={updateQuantity}
-                  onRemove={removeItem}
+        <div className="flex flex-col h-full">
+          <div className="flex-1 overflow-y-auto">
+            {items.length === 0 ? (
+              <div className="flex h-[400px] flex-col items-center justify-center space-y-2">
+                <ShoppingCart className="h-12 w-12 text-gray-400" />
+                <p className="text-lg font-medium text-gray-900">Your cart is empty</p>
+                <p className="text-gray-500">Add items to get started.</p>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {items.map((item) => (
+                  <CartItem
+                    key={item.id}
+                    {...item}
+                    onUpdateQuantity={updateQuantity}
+                    onRemove={removeItem}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+          {items.length > 0 && (
+            <div className="border-t bg-white">
+              <div className="p-6 space-y-4">
+                <CheckoutDisplay
+                  items={items}
+                  subtotal={subtotal}
+                  phoneNumber={phoneNumber}
+                  setPhoneNumber={setPhoneNumber}
+                  showReceipt={showReceipt}
+                  setShowReceipt={setShowReceipt}
+                  onNewOrder={() => {
+                    clearCart()
+                    setIsOpen(false)
+                  }}
+                  clearCart={clearCart}
                 />
-              ))}
+              </div>
             </div>
           )}
         </div>
-        <div className="flex-1" />
-        {items.length > 0 && (
-          <SheetFooter className="border-t bg-white">
-            <div className="w-full p-6 space-y-4">
-              <CheckoutDisplay
-                items={items}
-                subtotal={subtotal}
-                phoneNumber={phoneNumber}
-                setPhoneNumber={setPhoneNumber}
-                showReceipt={showReceipt}
-                setShowReceipt={setShowReceipt}
-                onNewOrder={() => {
-                  clearCart()
-                  setIsOpen(false)
-                }}
-                clearCart={clearCart}
-              />
-            </div>
-          </SheetFooter>
-        )}
       </SheetContent>
     </Sheet>
   )
