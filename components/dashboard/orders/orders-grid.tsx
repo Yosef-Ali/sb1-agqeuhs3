@@ -133,12 +133,20 @@ export function OrdersGrid({ data }: OrdersGridProps) {
               </div>
             )}
           </div>
-          {items.length > 0 && (
-            <div className="flex flex-col h-full">
-              <div className="flex-1 overflow-y-auto">
-                {/* Cart items will scroll here */}
-              </div>
-              <div className="border-t mt-auto p-6 space-y-4 bg-white">
+          <div className="flex flex-col h-full max-h-[calc(100vh-8rem)]">
+            <div className="flex-1 overflow-y-auto">
+              {items.length > 0 && (
+                <div className="divide-y">
+                  {items.map((item) => (
+                    <div key={item.id} className="flex gap-4 p-6">
+                      {/* ... existing item content ... */}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            {items.length > 0 && (
+              <div className="sticky bottom-0 border-t p-6 space-y-4 bg-white">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     type="tel"
@@ -176,7 +184,8 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                   Proceed to Checkout
                 </Button>
               </div>
-            </div>
+            )}
+          </div>
           )}
         </SheetContent>
       </Sheet>
