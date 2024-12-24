@@ -81,7 +81,7 @@ export function CartSheet() {
               </div>
             </SheetHeader>
             <div className="flex flex-col h-full">
-              <div className="flex-1 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto pb-32"> {/* Add bottom padding */}
                 {items.length === 0 ? (
                   <div className="flex h-[400px] flex-col items-center justify-center space-y-2">
                     <ShoppingCart className="h-12 w-12 text-gray-400" />
