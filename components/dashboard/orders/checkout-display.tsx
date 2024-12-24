@@ -110,8 +110,6 @@ export function CheckoutDisplay({
                   <Image
                     src={item.image || "/placeholder.png"}
                     alt={item.id}
-                    width={96}
-                    height={96}
                     className="object-cover object-center"
                     fill
                   />
