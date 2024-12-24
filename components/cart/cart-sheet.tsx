@@ -2,18 +2,21 @@
 /* @readonly */
 
 import { useState } from "react"
-import { ShoppingCart } from "lucide-react"
+import { ShoppingCart, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle
 } from "@/components/ui/sheet"
 import { useCartStore, useCartTotals } from "@/lib/store/cart-store"
 import { CartItem } from "@/types/cart"
 import { CartItem as CartItemComponent } from "./cart-item"
 import { CheckoutDisplay } from "./checkout-display"
+import { Separator } from "../ui/separator"
+import { toast } from "sonner"
+import { Input } from "../ui/input"
 
 export function CartSheet() {
   const [showCheckout, setShowCheckout] = useState(false)
@@ -26,6 +29,34 @@ export function CartSheet() {
     setIsOpen
   } = useCartStore()
   const { totalItems, subtotal } = useCartTotals()
+  const [phone, setPhone] = useState("")
+  const [coupon, setCoupon] = useState("")
+  const [isApplying, setIsApplying] = useState(false)
+  const [error, setError] = useState("")
+
+  const validatePhone = (phone: string) => {
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/
+    return phoneRegex.test(phone)
+  }
+
+  const handleApplyCoupon = async () => {
+    if (!validatePhone(phone)) {
+      setError("Please enter a valid phone number")
+      return
+    }
+
+    setIsApplying(true)
+    try {
+      // Simulate API call to validate coupon
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Add your coupon validation logic here
+      toast.success("Coupon applied successfully!")
+    } catch (err) {
+      toast.error("Invalid coupon code")
+    } finally {
+      setIsApplying(false)
+    }
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -66,11 +97,59 @@ export function CartSheet() {
                   </div>
                 )}
               </div>
+              <Separator />
+              <div className="p-4 flex items-center justify-between">
+                <p className="text-sm text-gray-500">Subtotal</p>
+                <p className="font-medium text-lg">${subtotal.toFixed(2)}</p>
+              </div>
+              <Separator />
+
+              {items.length > 0 && (
+                <div className="p-4 space-y-4">
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-500">Customer Information</p>
+
+                    {/* Coupon input first */}
+                    <div className="flex gap-2">
+                      <Input
+                        type="text"
+                        placeholder="Coupon code"
+                        value={coupon}
+                        onChange={(e) => setCoupon(e.target.value)}
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={handleApplyCoupon}
+                        disabled={!coupon || isApplying}
+                      >
+                        {isApplying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Apply
+                      </Button>
+                    </div>
+
+                    {/* Phone input second */}
+                    <Input
+                      type="tel"
+                      placeholder="Phone number"
+                      value={phone}
+                      onChange={(e) => {
+                        setPhone(e.target.value)
+                        setError("")
+                      }}
+                      className={error ? "border-red-500" : ""}
+                    />
+                    {error && <p className="text-sm text-red-500">{error}</p>}
+                  </div>
+                </div>
+              )}
+
               <div className="border-t bg-white sticky bottom-0 p-4">
-                <Button 
-                  className="w-full" 
+                <Button
+                  className="w-full"
                   size="lg"
                   onClick={() => setShowCheckout(true)}
+                  disabled={items.length === 0 || !validatePhone(phone)}
                 >
                   Proceed to Checkout
                 </Button>
@@ -78,11 +157,12 @@ export function CartSheet() {
             </div>
           </>
         ) : (
-          <CheckoutDisplay 
-            items={items} 
-            subtotal={subtotal} 
+          <CheckoutDisplay
+            items={items}
+            subtotal={subtotal}
             clearCart={clearCart}
             onBack={() => setShowCheckout(false)}
+            phone={phone}
           />
         )}
       </SheetContent>
