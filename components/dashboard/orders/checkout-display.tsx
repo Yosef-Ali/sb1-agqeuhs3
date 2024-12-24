@@ -1,4 +1,5 @@
 import { useState } from "react"
+import Image from "next/image"
 import { CartItem } from "@/lib/store/cart-store"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -105,13 +106,16 @@ export function CheckoutDisplay({
           {items.map((item) => (
             <div key={item.id} className="flex gap-4 p-6">
               <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                <Image
-                  src={item.image || "/placeholder.png"}
-                  alt={item.id}
-                  width={96}
-                  height={96}
-                  className="h-full w-full object-cover object-center"
-                />
+                <div className="relative h-full w-full">
+                  <Image
+                    src={item.image || "/placeholder.png"}
+                    alt={item.id}
+                    width={96}
+                    height={96}
+                    className="object-cover object-center"
+                    fill
+                  />
+                </div>
               </div>
               <div className="flex flex-1 flex-col">
                 <div className="flex justify-between text-base font-medium">
