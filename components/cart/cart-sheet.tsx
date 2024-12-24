@@ -61,7 +61,7 @@ export function CartSheet() {
         {items.length > 0 && (
           <SheetFooter className="border-t bg-white">
             <div className="w-full p-6 space-y-4">
-              <CheckoutDisplay 
+              <CheckoutDisplay
                 items={items}
                 subtotal={subtotal}
                 phoneNumber={phoneNumber}
