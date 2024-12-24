@@ -57,14 +57,13 @@ export function CartSheet() {
               </div>
             )}
           </div>
-          {items.length > 0 && (
-            <div className="border-t bg-white sticky bottom-0">
-              <CheckoutDisplay
-                items={items}
-                subtotal={subtotal}
-              />
-            </div>
-          )}
+          <div className="border-t bg-white sticky bottom-0">
+            <CheckoutDisplay
+              items={items}
+              subtotal={subtotal}
+              clearCart={clearCart}
+            />
+          </div>
         </div>
       </SheetContent>
     </Sheet>
