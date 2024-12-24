@@ -5,6 +5,11 @@ export type InsertTables<T extends keyof Database['public']['Tables']> = Databas
 export type UpdateTables<T extends keyof Database['public']['Tables']> = Database['public']['Tables'][T]['Update']
 
 export type Product = Tables<'products'>
+export type ProductWithDetails = Product & {
+  description: string | null;
+  price: number;
+  stock_quantity: number;
+}
 export type Customer = Tables<'customers'>
 export type Order = Tables<'orders'>
 export type OrderItem = Tables<'order_items'>
