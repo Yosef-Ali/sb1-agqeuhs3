@@ -4,6 +4,7 @@ import { Printer, Share } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CartItem } from "@/lib/store/cart-store"
 import { Separator } from "@/components/ui/separator"
+import { SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { useState } from "react"
 import { toast } from "sonner"
 

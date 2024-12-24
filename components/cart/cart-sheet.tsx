@@ -4,7 +4,12 @@
 import { useState } from "react"
 import { ShoppingCart } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetHeader, 
+  SheetTitle 
+} from "@/components/ui/sheet"
 import { useCartStore, useCartTotals } from "@/lib/store/cart-store"
 import { CartItem } from "@/types/cart"
 import { CartItem as CartItemComponent } from "./cart-item"
