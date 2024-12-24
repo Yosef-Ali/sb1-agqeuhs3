@@ -6,10 +6,11 @@ import { toast } from "sonner"
 export type CartItem = {
   id: string
   customer: string
-  status: string
+  status: "pending" | "processing" | "completed" | "cancelled"
   total: number
   image?: string
   quantity: number
+  createdAt?: Date
 }
 
 interface CartContextType {

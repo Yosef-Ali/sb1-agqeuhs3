@@ -1,13 +1,14 @@
 import { Product } from './database'
 
-export interface CartItem {
+export type CartItem = {
   id: string
   customer: string
   status: "pending" | "processing" | "completed" | "cancelled"
   total: number
   quantity: number
   image?: string
-  product?: Product // Keep this if you need it for backward compatibility
+  createdAt?: Date
+  product?: Product
 }
 
 export interface CartState {
