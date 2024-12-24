@@ -55,21 +55,6 @@ export function OrdersGrid({ data }: OrdersGridProps) {
 
   return (
     <div className="relative">
-      <div className="sticky top-0 z-10 flex justify-end p-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="relative"
-          onClick={() => setIsOpen(true)}
-        >
-          <ShoppingCart className="h-5 w-5" />
-          {totalItems > 0 && (
-            <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-primary text-xs text-primary-foreground flex items-center justify-center">
-              {totalItems}
-            </span>
-          )}
-        </Button>
-      </div>
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg">
