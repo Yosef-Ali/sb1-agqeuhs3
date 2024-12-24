@@ -1,6 +1,6 @@
 "use client"
 
-import { CartItem } from "@/types/cart"  // Update this import
+import { CartItem } from "@/types/cart"
 import { Printer, Share, ArrowLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
