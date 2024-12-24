@@ -62,11 +62,6 @@ export function CartSheet() {
               <CheckoutDisplay
                 items={items}
                 subtotal={subtotal}
-                onNewOrder={() => {
-                  clearCart()
-                  setIsOpen(false)
-                }}
-                clearCart={clearCart}
               />
             </div>
           )}

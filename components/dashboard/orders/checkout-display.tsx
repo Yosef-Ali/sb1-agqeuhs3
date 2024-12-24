@@ -12,12 +12,8 @@ import { toast } from "sonner"
 interface CheckoutDisplayProps {
   items: CartItem[]
   subtotal: number
-  phoneNumber: string
-  setPhoneNumber: (value: string) => void
-  showReceipt: boolean
-  setShowReceipt: (value: boolean) => void
-  onNewOrder: () => void
-  clearCart: () => void
+  onNewOrder?: () => void
+  clearCart?: () => void
 }
 
 export function CheckoutDisplay({
