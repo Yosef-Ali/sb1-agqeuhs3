@@ -102,8 +102,8 @@ export function CartSheet() {
                 )}
               </div>
               <Separator />
-              <div className="p-4 flex items-center justify-between">
-                <p className="text-sm text-gray-500">Subtotal</p>
+              <div className="p-4 flex items-center justify-between bg-gray-50">
+                <p className="text-sm font-medium">Subtotal</p>
                 <p className="font-medium text-lg">${subtotal.toFixed(2)}</p>
               </div>
               <Separator />
@@ -186,6 +186,7 @@ export function CartSheet() {
                   size="lg"
                   onClick={() => setShowCheckout(true)}
                   disabled={items.length === 0 || !validatePhone(phone)}
+                  className="w-full bg-primary hover:bg-primary/90 text-white"
                 >
                   {items.length === 0 
                     ? 'Your cart is empty'
