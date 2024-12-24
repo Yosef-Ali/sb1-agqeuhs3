@@ -34,3 +34,9 @@ export async function getUser() {
   if (error) return null
   return user
 }
+function redirect(path: string) {
+  const error = new Error('Redirect');
+  error.stack = `${error.name}: ${error.message}\n    at redirect (${path})`;
+  throw error;
+}
+
