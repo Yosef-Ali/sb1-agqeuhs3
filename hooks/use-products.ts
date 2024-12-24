@@ -115,5 +115,5 @@ export function useProducts() {
     };
   }, []);
 
-  return { products, isLoading, error };
+  return { products, isLoading, error, refreshProducts };
 }

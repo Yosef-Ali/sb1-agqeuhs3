@@ -259,7 +259,7 @@ export function ProductsTable() {
 
       if (error) throw error
 
-      await fetchProducts() // Refresh the list
+      await refreshProducts() // Refresh the list
     } catch (err) {
       console.error("Error deleting product:", err)
       setError(err instanceof Error ? err.message : "Failed to delete product")
