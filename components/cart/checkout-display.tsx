@@ -4,6 +4,8 @@ import { Printer, Share } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { CartItem } from "@/lib/store/cart-store"
 import { Separator } from "@/components/ui/separator"
+import { useState } from "react"
+import { toast } from "sonner"
 
 interface CheckoutDisplayProps {
   items: CartItem[]
@@ -44,9 +46,9 @@ export function CheckoutDisplay({
             <p className="text-sm text-gray-500">Order #{orderNumber}</p>
             <p className="text-sm text-gray-500">{currentDate}</p>
           </div>
-          
+
           <Separator />
-          
+
           <div className="space-y-4">
             {items.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
@@ -63,9 +65,9 @@ export function CheckoutDisplay({
               </div>
             ))}
           </div>
-          
+
           <Separator />
-          
+
           <div className="space-y-2">
             <div className="flex justify-between font-bold">
               <span>Total</span>
@@ -77,13 +79,13 @@ export function CheckoutDisplay({
               </span>
             </div>
           </div>
-          
+
           <div className="text-center text-sm text-gray-500 pt-4">
             <p>Thank you for your purchase!</p>
             <p>Please visit again</p>
           </div>
         </div>
-        
+
         <div className="border-t p-6">
           <div className="flex gap-4">
             <Button
@@ -118,7 +120,7 @@ export function CheckoutDisplay({
         <div className="text-center">
           <h2 className="font-bold text-xl">Checkout</h2>
         </div>
-        
+
         <div className="space-y-4">
           {items.map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
@@ -135,9 +137,9 @@ export function CheckoutDisplay({
             </div>
           ))}
         </div>
-        
+
         <Separator />
-        
+
         <div className="space-y-2">
           <div className="flex justify-between font-bold">
             <span>Total</span>
@@ -149,13 +151,13 @@ export function CheckoutDisplay({
             </span>
           </div>
         </div>
-        
+
         <div className="text-center text-sm text-gray-500 pt-4">
           <p>Thank you for your purchase!</p>
           <p>Please visit again</p>
         </div>
       </div>
-      
+
       <div className="border-t p-6">
         <div className="flex gap-4">
           <Button
