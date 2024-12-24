@@ -73,12 +73,26 @@ export function CartSheet() {
             </div>
           </>
         ) : (
-          <CheckoutDisplay 
-            items={items} 
-            subtotal={subtotal} 
-            clearCart={clearCart}
-            onBack={() => setShowCheckout(false)} 
-          />
+          <>
+            <SheetHeader className="px-6 py-4 border-b">
+              <div className="flex items-center">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowCheckout(false)}
+                  className="mr-2"
+                >
+                  ←
+                </Button>
+                <SheetTitle>Checkout</SheetTitle>
+              </div>
+            </SheetHeader>
+            <CheckoutDisplay 
+              items={items} 
+              subtotal={subtotal} 
+              clearCart={clearCart}
+            />
+          </>
         )}
       </SheetContent>
     </Sheet>
