@@ -129,6 +129,7 @@ export const columns: ColumnDef<Order>[] = [
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { OrdersGrid } from "./orders-grid"
+import { CartProvider } from "@/components/cart/cart-context"
 
 export function OrdersTable() {
   // Add sample image URLs to the data
@@ -161,7 +162,8 @@ export function OrdersTable() {
   })
 
   return (
-    <div className="space-y-4">
+    <CartProvider>
+      <div className="space-y-4">
       <Tabs defaultValue="grid" className="w-full">
         <TabsList>
           <TabsTrigger value="grid">Grid View</TabsTrigger>
@@ -224,6 +226,7 @@ export function OrdersTable() {
           <OrdersTablePagination table={table} />
         </TabsContent>
       </Tabs>
-    </div>
+      </div>
+    </CartProvider>
   )
 }
