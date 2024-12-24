@@ -56,15 +56,15 @@ export function OrdersGrid({ data }: OrdersGridProps) {
     <div className="relative">
 
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg">
-          <SheetHeader>
-            <SheetTitle>Shopping Cart ({totalItems} items)</SheetTitle>
+        <SheetContent side="right" className="w-full sm:max-w-lg p-0">
+          <SheetHeader className="px-6 py-4 border-b">
+            <SheetTitle className="text-xl font-semibold">Cart ({totalItems})</SheetTitle>
           </SheetHeader>
           <div className="flex h-full flex-col">
-            <div className="flex-1 overflow-y-auto py-6">
+            <div className="flex-1 overflow-y-auto">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-4 py-6 border-b">
-                  <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border">
+                <div key={item.id} className="flex gap-4 p-6 border-b">
+                  <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
                     <Image
                       src={item.image || "/placeholder.png"}
                       alt={item.id}
@@ -124,9 +124,8 @@ export function OrdersGrid({ data }: OrdersGridProps) {
               )}
             </div>
             {items.length > 0 && (
-              <div className="space-y-4 px-4 py-6">
-                <Separator />
-                <div className="space-y-1.5">
+              <div className="border-t">
+                <div className="p-6 space-y-4">
                   <div className="flex justify-between">
                     <span className="font-medium">Subtotal</span>
                     <span>
@@ -151,7 +150,7 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                     }).format(subtotal)}
                   </span>
                 </div>
-                <div className="space-y-2">
+                <div className="grid gap-2 px-6 pb-6">
                   <Button className="w-full" size="lg">
                     Checkout
                   </Button>
