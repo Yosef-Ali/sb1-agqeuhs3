@@ -7,10 +7,11 @@ import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { ShoppingCart, Minus, Plus } from "lucide-react"
+import { ShoppingCart, Minus, Plus, Printer, Share } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
 import { useCartStore, useCartTotals } from "@/lib/store/cart-store"
 import { Separator } from "@/components/ui/separator"
+import { Receipt } from "./receipt"
 
 type Order = {
   id: string
@@ -42,6 +43,8 @@ const getStatusColor = (status: string) => {
 
 export function OrdersGrid({ data }: OrdersGridProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const [showReceipt, setShowReceipt] = useState(false)
   const { 
     items, 
     addItem, 
@@ -134,6 +137,8 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                         id="phone" 
                         placeholder="Enter your phone number"
                         className="h-9"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
@@ -174,9 +179,56 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                   </div>
                 </div>
                 <div className="grid gap-2 px-6 pb-6">
-                  <Button className="w-full" size="lg">
-                    Checkout
-                  </Button>
+                  {!showReceipt ? (
+                    <Button 
+                      className="w-full" 
+                      size="lg"
+                      onClick={() => setShowReceipt(true)}
+                    >
+                      Checkout
+                    </Button>
+                  ) : (
+                    <div className="space-y-4">
+                      <Receipt 
+                        items={items}
+                        subtotal={subtotal}
+                        phoneNumber={phoneNumber}
+                      />
+                      <div className="flex gap-2">
+                        <Button 
+                          className="flex-1" 
+                          onClick={() => window.print()}
+                          variant="outline"
+                        >
+                          <Printer className="w-4 h-4 mr-2" />
+                          Print
+                        </Button>
+                        <Button
+                          className="flex-1"
+                          onClick={() => {
+                            const receiptText = document.querySelector('pre')?.textContent
+                            if (receiptText) {
+                              window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(receiptText)}`)
+                            }
+                          }}
+                        >
+                          <Share className="w-4 h-4 mr-2" />
+                          Share
+                        </Button>
+                      </div>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => {
+                          setShowReceipt(false)
+                          clearCart()
+                          setPhoneNumber("")
+                        }}
+                      >
+                        New Order
+                      </Button>
+                    </div>
+                  )}
                   <Button 
                     variant="outline" 
                     className="w-full"
