@@ -2,7 +2,6 @@
 /* @readonly */
 
 import { useState } from "react"
-import { CartItem } from "@/types/cart"
 import { ShoppingCart, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
