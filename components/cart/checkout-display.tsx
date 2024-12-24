@@ -1,113 +1,94 @@
 "use client"
 
-import { useState } from "react"
-import { CartItem } from "@/lib/store/cart-store"
+import { Printer, Share } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { CartItem } from "@/lib/store/cart-store"
 import { Separator } from "@/components/ui/separator"
-import { Receipt } from "../dashboard/orders/receipt"
-import { toast } from "sonner"
 
 interface CheckoutDisplayProps {
   items: CartItem[]
   subtotal: number
-  onNewOrder: () => void
-  clearCart: () => void
 }
 
 export function CheckoutDisplay({
   items,
   subtotal,
-  onNewOrder,
-  clearCart,
 }: CheckoutDisplayProps) {
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [couponCode, setCouponCode] = useState("")
-  const [showReceipt, setShowReceipt] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  const handleCheckout = async () => {
-    try {
-      setIsProcessing(true)
-      setError(null)
-
-      // Process checkout logic here
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
-
-      onNewOrder()
-      setShowReceipt(true)
-      toast.success("Order placed successfully!")
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred"
-      setError(errorMessage)
-      toast.error("Checkout failed", {
-        description: errorMessage
-      })
-    } finally {
-      setIsProcessing(false)
-    }
-  }
-
-  if (showReceipt) {
-    return (
-      <Receipt
-        items={items}
-        subtotal={subtotal}
-        phoneNumber={phoneNumber}
-      />
-    )
-  }
+  const currentDate = new Date().toLocaleDateString()
+  const orderNumber = Math.floor(Math.random() * 1000000).toString().padStart(6, '0')
 
   return (
-    <div className="p-6 space-y-4">
-      <div className="space-y-4">
-        <Input
-          type="tel"
-          placeholder="Phone Number"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-        />
-        <Input
-          type="text"
-          placeholder="Coupon Code (Optional)"
-          value={couponCode}
-          onChange={(e) => setCouponCode(e.target.value)}
-        />
-      </div>
-      <div className="space-y-4">
-        <div className="flex justify-between text-sm">
-          <span>Subtotal</span>
-          <span>{new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD"
-          }).format(subtotal)}</span>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 p-6 space-y-4">
+        <div className="text-center space-y-2">
+          <h2 className="font-bold text-xl">RECEIPT</h2>
+          <p className="text-sm text-gray-500">Order #{orderNumber}</p>
+          <p className="text-sm text-gray-500">{currentDate}</p>
         </div>
-        {couponCode && (
-          <div className="flex justify-between text-sm text-green-600">
-            <span>Discount</span>
-            <span>-$0.00</span>
+        
+        <Separator />
+        
+        <div className="space-y-4">
+          {items.map((item) => (
+            <div key={item.id} className="flex justify-between text-sm">
+              <div>
+                <p>{item.customer}</p>
+                <p className="text-gray-500">Qty: {item.quantity}</p>
+              </div>
+              <p>
+                {new Intl.NumberFormat("en-US", {
+                  style: "currency",
+                  currency: "USD"
+                }).format(item.total * item.quantity)}
+              </p>
+            </div>
+          ))}
+        </div>
+        
+        <Separator />
+        
+        <div className="space-y-2">
+          <div className="flex justify-between font-bold">
+            <span>Total</span>
+            <span>
+              {new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD"
+              }).format(subtotal)}
+            </span>
           </div>
-        )}
-        <div className="flex justify-between font-medium">
-          <span>Total</span>
-          <span>{new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD"
-          }).format(subtotal)}</span>
+        </div>
+        
+        <div className="text-center text-sm text-gray-500 pt-4">
+          <p>Thank you for your purchase!</p>
+          <p>Please visit again</p>
         </div>
       </div>
-      <Button
-        className="w-full"
-        size="lg"
-        onClick={handleCheckout}
-        disabled={isProcessing}
-      >
-        {isProcessing ? "Processing..." : "Checkout"}
-      </Button>
-      {error && (
-        <p className="text-sm text-red-500 text-center">{error}</p>
-      )}
+      
+      <div className="border-t p-6">
+        <div className="flex gap-4">
+          <Button
+            className="flex-1"
+            onClick={() => window.print()}
+            variant="outline"
+          >
+            <Printer className="w-4 h-4 mr-2" />
+            Print
+          </Button>
+          <Button
+            className="flex-1"
+            onClick={() => {
+              const receiptText = document.querySelector('.space-y-4')?.textContent
+              if (receiptText) {
+                window.open(`https://wa.me/?text=${encodeURIComponent(receiptText)}`)
+              }
+            }}
+          >
+            <Share className="w-4 h-4 mr-2" />
+            Share
+          </Button>
+        </div>
+      </div>
     </div>
   )
 }
