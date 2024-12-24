@@ -1,4 +1,5 @@
 "use client"
+/* @readonly */
 
 import { useState } from "react"
 import { ShoppingCart } from "lucide-react"
