@@ -1,12 +1,15 @@
 "use client"
 
+"use client"
+
 import { useState } from "react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { ShoppingCart } from "lucide-react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { useToast } from "@/hooks/use-toast"
+import { ShoppingCart, Minus, Plus } from "lucide-react"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
+import { useCart } from "@/components/cart/cart-context"
+import { Separator } from "@/components/ui/separator"
 
 type Order = {
   id: string
@@ -38,33 +41,44 @@ const getStatusColor = (status: string) => {
 
 export function OrdersGrid({ data }: OrdersGridProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
-  const [cartItems, setCartItems] = useState<Order[]>([])
-  const [isCartOpen, setIsCartOpen] = useState(false)
-  const { toast } = useToast()
-
-  const addToCart = (order: Order) => {
-    setCartItems([...cartItems, order])
-    setIsCartOpen(true)
-    toast({
-      title: "Added to cart",
-      description: `${order.id} has been added to your cart`,
-    })
-  }
-
-  const removeFromCart = (orderId: string) => {
-    setCartItems(cartItems.filter(item => item.id !== orderId))
-  }
+  const { 
+    items, 
+    addItem, 
+    removeItem, 
+    updateQuantity, 
+    clearCart,
+    isOpen, 
+    setIsOpen,
+    totalItems,
+    subtotal 
+  } = useCart()
 
   return (
     <div className="relative">
-      <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
+      <div className="sticky top-0 z-10 flex justify-end p-4">
+        <Button
+          variant="outline"
+          size="sm"
+          className="relative"
+          onClick={() => setIsOpen(true)}
+        >
+          <ShoppingCart className="h-5 w-5" />
+          {totalItems > 0 && (
+            <span className="absolute -top-2 -right-2 h-5 w-5 rounded-full bg-primary text-xs text-primary-foreground flex items-center justify-center">
+              {totalItems}
+            </span>
+          )}
+        </Button>
+      </div>
+
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg">
           <SheetHeader>
-            <SheetTitle>Shopping Cart ({cartItems.length} items)</SheetTitle>
+            <SheetTitle>Shopping Cart ({totalItems} items)</SheetTitle>
           </SheetHeader>
           <div className="flex h-full flex-col">
             <div className="flex-1 overflow-y-auto py-6">
-              {cartItems.map((item) => (
+              {items.map((item) => (
                 <div key={item.id} className="flex gap-4 py-6 border-b">
                   <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border">
                     <Image
@@ -82,21 +96,34 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                         {new Intl.NumberFormat("en-US", {
                           style: "currency",
                           currency: "USD",
-                        }).format(item.total)}
+                        }).format(item.total * item.quantity)}
                       </p>
                     </div>
                     <p className="mt-1 text-sm text-gray-500">Order ID: {item.id}</p>
                     <div className="flex flex-1 items-end justify-between text-sm">
-                      <Badge variant={getStatusColor(item.status)}>
-                        {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
-                      </Badge>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                        >
+                          <Minus className="h-4 w-4" />
+                        </Button>
+                        <span className="w-8 text-center">{item.quantity}</span>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                        >
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeFromCart(item.id);
-                        }}
+                        onClick={() => removeItem(item.id)}
                       >
                         Remove
                       </Button>
@@ -104,7 +131,7 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                   </div>
                 </div>
               ))}
-              {cartItems.length === 0 && (
+              {items.length === 0 && (
                 <div className="flex h-full flex-col items-center justify-center space-y-2">
                   <ShoppingCart className="h-12 w-12 text-gray-400" />
                   <p className="text-lg font-medium text-gray-900">Your cart is empty</p>
@@ -112,21 +139,44 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                 </div>
               )}
             </div>
-            {cartItems.length > 0 && (
-              <div className="border-t px-4 py-6 sm:px-6">
-                <div className="flex justify-between text-base font-medium">
-                  <p>Subtotal</p>
-                  <p>
+            {items.length > 0 && (
+              <div className="space-y-4 px-4 py-6">
+                <Separator />
+                <div className="space-y-1.5">
+                  <div className="flex justify-between">
+                    <span className="font-medium">Subtotal</span>
+                    <span>
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      }).format(subtotal)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="font-medium">Shipping</span>
+                    <span>Free</span>
+                  </div>
+                </div>
+                <Separator />
+                <div className="flex justify-between font-medium">
+                  <span>Total</span>
+                  <span>
                     {new Intl.NumberFormat("en-US", {
                       style: "currency",
                       currency: "USD",
-                    }).format(cartItems.reduce((total, item) => total + item.total, 0))}
-                  </p>
+                    }).format(subtotal)}
+                  </span>
                 </div>
-                <p className="mt-0.5 text-sm text-gray-500">Shipping and taxes calculated at checkout.</p>
-                <div className="mt-6">
+                <div className="space-y-2">
                   <Button className="w-full" size="lg">
                     Checkout
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={clearCart}
+                  >
+                    Clear Cart
                   </Button>
                 </div>
               </div>
