@@ -39,6 +39,7 @@ export function CartSheet() {
   const finalTotal = subtotal - discount
 
   const validatePhone = (phone: string) => {
+    if (!phone) return true // Allow empty phone number
     const phoneRegex = /^\+?[1-9]\d{1,14}$/
     return phoneRegex.test(phone)
   }
@@ -181,18 +182,18 @@ export function CartSheet() {
               )}
 
               <div className="border-t bg-white sticky bottom-0 p-4">
-                <Button
-                  size="lg"
-                  onClick={() => setShowCheckout(true)}
-                  disabled={items.length === 0 || !validatePhone(phone)}
-                  className="w-full bg-primary hover:bg-primary/90 text-white"
-                >
-                  {items.length === 0 
-                    ? 'Your cart is empty'
-                    : !validatePhone(phone)
-                    ? 'Enter phone number to continue'
-                    : `Checkout • $${finalTotal.toFixed(2)}`}
-                </Button>
+                <div className="flex gap-4">
+                  <Button
+                    size="lg"
+                    onClick={() => setShowCheckout(true)}
+                    disabled={items.length === 0}
+                    className="flex-1 bg-primary hover:bg-primary/90 text-white"
+                  >
+                    {items.length === 0 
+                      ? 'Your cart is empty'
+                      : `Checkout • $${finalTotal.toFixed(2)}`}
+                  </Button>
+                </div>
               </div>
             </div>
           </>

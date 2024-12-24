@@ -62,7 +62,7 @@ export function CheckoutDisplay({
           <h2 className="font-bold text-xl">RECEIPT</h2>
           <p className="text-sm text-gray-500">Order #{orderNumber}</p>
           <p className="text-sm text-gray-500">{currentDate}</p>
-          <p className="text-sm text-gray-500">Phone: {phone}</p>
+          {phone && <p className="text-sm text-gray-500">Phone: {phone}</p>}
         </div>
 
         <Separator />
