@@ -20,6 +20,12 @@ import { Input } from "../ui/input"
 
 export function CartSheet() {
   const [showCheckout, setShowCheckout] = useState(false)
+  const [phone, setPhone] = useState("")
+  const [coupon, setCoupon] = useState("")
+  const [isApplying, setIsApplying] = useState(false)
+  const [error, setError] = useState("")
+  const [discount, setDiscount] = useState(0)
+  
   const {
     items,
     removeItem,
@@ -28,11 +34,9 @@ export function CartSheet() {
     isOpen,
     setIsOpen
   } = useCartStore()
+  
   const { totalItems, subtotal } = useCartTotals()
-  const [phone, setPhone] = useState("")
-  const [coupon, setCoupon] = useState("")
-  const [isApplying, setIsApplying] = useState(false)
-  const [error, setError] = useState("")
+  const finalTotal = subtotal - discount
 
   const validatePhone = (phone: string) => {
     const phoneRegex = /^\+?[1-9]\d{1,14}$/
@@ -105,15 +109,14 @@ export function CartSheet() {
               <Separator />
 
               {items.length > 0 && (
-                <div className="p-4 space-y-4">
+                <div className="p-4 space-y-6">
+                  {/* Coupon Section */}
                   <div className="space-y-2">
-                    <p className="text-sm text-gray-500">Customer Information</p>
-
-                    {/* Coupon input first */}
+                    <p className="text-sm font-medium">Have a coupon?</p>
                     <div className="flex gap-2">
                       <Input
                         type="text"
-                        placeholder="Coupon code"
+                        placeholder="Enter coupon code"
                         value={coupon}
                         onChange={(e) => setCoupon(e.target.value)}
                         className="flex-1"
@@ -123,12 +126,23 @@ export function CartSheet() {
                         onClick={handleApplyCoupon}
                         disabled={!coupon || isApplying}
                       >
-                        {isApplying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        Apply
+                        {isApplying ? (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        ) : (
+                          'Apply'
+                        )}
                       </Button>
                     </div>
+                    {discount > 0 && (
+                      <p className="text-sm text-green-600">
+                        Coupon applied! You saved ${discount.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
 
-                    {/* Phone input second */}
+                  {/* Customer Information */}
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium">Contact Information</p>
                     <Input
                       type="tel"
                       placeholder="Phone number"
@@ -139,7 +153,29 @@ export function CartSheet() {
                       }}
                       className={error ? "border-red-500" : ""}
                     />
-                    {error && <p className="text-sm text-red-500">{error}</p>}
+                    {error && (
+                      <p className="text-sm text-red-500">{error}</p>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Order Summary */}
+              {items.length > 0 && (
+                <div className="border-t p-4 space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span>Subtotal</span>
+                    <span>${subtotal.toFixed(2)}</span>
+                  </div>
+                  {discount > 0 && (
+                    <div className="flex justify-between text-sm text-green-600">
+                      <span>Discount</span>
+                      <span>-${discount.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between font-medium pt-2 border-t">
+                    <span>Total</span>
+                    <span>${finalTotal.toFixed(2)}</span>
                   </div>
                 </div>
               )}
@@ -151,7 +187,11 @@ export function CartSheet() {
                   onClick={() => setShowCheckout(true)}
                   disabled={items.length === 0 || !validatePhone(phone)}
                 >
-                  Proceed to Checkout
+                  {items.length === 0 
+                    ? 'Your cart is empty'
+                    : !validatePhone(phone)
+                    ? 'Enter phone number to continue'
+                    : `Checkout • $${finalTotal.toFixed(2)}`}
                 </Button>
               </div>
             </div>
