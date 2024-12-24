@@ -162,14 +162,16 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                   </div>
                 </div>
                 <Separator />
-                <div className="flex justify-between font-medium">
-                  <span>Total</span>
-                  <span>
-                    {new Intl.NumberFormat("en-US", {
-                      style: "currency",
-                      currency: "USD",
-                    }).format(subtotal)}
-                  </span>
+                <div className="p-6">
+                  <div className="flex justify-between font-medium text-lg">
+                    <span>Total</span>
+                    <span>
+                      {new Intl.NumberFormat("en-US", {
+                        style: "currency",
+                        currency: "USD",
+                      }).format(subtotal)}
+                    </span>
+                  </div>
                 </div>
                 <div className="grid gap-2 px-6 pb-6">
                   <Button className="w-full" size="lg">
