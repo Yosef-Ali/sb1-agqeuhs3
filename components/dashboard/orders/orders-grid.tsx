@@ -205,7 +205,15 @@ export function OrdersGrid({ data }: OrdersGridProps) {
             onMouseLeave={() => setHoveredItem(null)}
           >
             <button
-              onClick={() => addItem(order)}
+              onClick={() => {
+                addItem({
+                  id: order.id,
+                  customer: order.customer,
+                  status: order.status,
+                  total: order.total,
+                  image: order.image || "/placeholder.png"
+                })
+              }}
               className="w-full aspect-square overflow-hidden"
             >
               <Image
