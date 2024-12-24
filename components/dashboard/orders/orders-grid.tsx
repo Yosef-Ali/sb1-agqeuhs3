@@ -60,13 +60,17 @@ export function OrdersGrid({ data }: OrdersGridProps) {
   return (
     <div className="relative">
 
-      <Sheet open={isOpen} onOpenChange={setIsOpen} className="border-none">
-        <SheetContent side="right" className="w-full sm:max-w-lg p-0 border-none">
+      <Sheet open={isOpen} onOpenChange={setIsOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-lg border-none p-0">
           <SheetHeader className="px-6 py-4 border-b">
-            <SheetTitle className="text-xl font-semibold">Cart ({totalItems})</SheetTitle>
+            <SheetTitle className="flex items-center justify-between">
+              <span>Cart ({totalItems})</span>
+              <Button variant="ghost" size="sm" onClick={clearCart}>
+                Clear Cart
+              </Button>
+            </SheetTitle>
           </SheetHeader>
-          <div className="flex h-full flex-col">
-            <div className="flex-1 overflow-y-auto" style={{ maxHeight: "calc(100vh - 300px)" }}>
+          <div className="flex-1 overflow-y-auto">
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4 p-6 border-b">
                   <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
@@ -120,29 +124,45 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                   </div>
                 </div>
               ))}
-              {items.length === 0 && (
-                <div className="flex h-full flex-col items-center justify-center space-y-2">
+              {items.length === 0 ? (
+                <div className="flex h-[400px] flex-col items-center justify-center space-y-2">
                   <ShoppingCart className="h-12 w-12 text-gray-400" />
                   <p className="text-lg font-medium text-gray-900">Your cart is empty</p>
                   <p className="text-gray-500">Add items to get started.</p>
                 </div>
+              ) : (
+                <>
+                  <div className="flex-1 px-6">
+                    <CheckoutDisplay
+                      items={items}
+                      subtotal={subtotal}
+                      phoneNumber={phoneNumber}
+                      setPhoneNumber={setPhoneNumber}
+                      showReceipt={showReceipt}
+                      setShowReceipt={setShowReceipt}
+                      onNewOrder={() => {
+                        clearCart()
+                        setPhoneNumber("")
+                      }}
+                      clearCart={clearCart}
+                    />
+                  </div>
+                  <div className="border-t p-6">
+                    <div className="flex justify-between mb-4">
+                      <span className="font-medium">Total</span>
+                      <span className="font-medium">
+                        {new Intl.NumberFormat("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        }).format(subtotal)}
+                      </span>
+                    </div>
+                    <Button className="w-full" size="lg" onClick={() => setShowReceipt(true)}>
+                      Checkout
+                    </Button>
+                  </div>
+                </>
               )}
-            </div>
-            {items.length > 0 && (
-              <CheckoutDisplay
-                items={items}
-                subtotal={subtotal}
-                phoneNumber={phoneNumber}
-                setPhoneNumber={setPhoneNumber}
-                showReceipt={showReceipt}
-                setShowReceipt={setShowReceipt}
-                onNewOrder={() => {
-                  clearCart()
-                  setPhoneNumber("")
-                }}
-                clearCart={clearCart}
-              />
-            )}
           </div>
         </SheetContent>
       </Sheet>
