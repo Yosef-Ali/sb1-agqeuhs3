@@ -57,22 +57,25 @@ export function CartSheet() {
             </div>
           )}
         </div>
+        <div className="flex-1" />
         {items.length > 0 && (
-          <div className="sticky bottom-0 border-t p-6 space-y-4 bg-white">
-            <CheckoutDisplay 
-              items={items}
-              subtotal={subtotal}
-              phoneNumber={phoneNumber}
-              setPhoneNumber={setPhoneNumber}
-              showReceipt={showReceipt}
-              setShowReceipt={setShowReceipt}
-              onNewOrder={() => {
-                clearCart()
-                setIsOpen(false)
-              }}
-              clearCart={clearCart}
-            />
-          </div>
+          <SheetFooter className="border-t bg-white">
+            <div className="w-full p-6 space-y-4">
+              <CheckoutDisplay 
+                items={items}
+                subtotal={subtotal}
+                phoneNumber={phoneNumber}
+                setPhoneNumber={setPhoneNumber}
+                showReceipt={showReceipt}
+                setShowReceipt={setShowReceipt}
+                onNewOrder={() => {
+                  clearCart()
+                  setIsOpen(false)
+                }}
+                clearCart={clearCart}
+              />
+            </div>
+          </SheetFooter>
         )}
       </SheetContent>
     </Sheet>
