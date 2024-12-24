@@ -44,8 +44,10 @@ export const useCartStore = create<CartStore>((set, get) => ({
           ),
           loading: false
         }))
-        toast.info("Item already in cart", {
-          description: "Quantity has been increased"
+        toast({
+          title: "Item already in cart",
+          description: "Quantity has been increased",
+          variant: "default"
         })
         return
       }
@@ -55,13 +57,17 @@ export const useCartStore = create<CartStore>((set, get) => ({
         isOpen: true,
         loading: false
       }))
-      toast.success("Added to cart", {
-        description: `${newItem.id} has been added to your cart`
+      toast({
+        title: "Added to cart",
+        description: `${newItem.id} has been added to your cart`,
+        variant: "default"
       })
     } catch (err) {
       set({ error: err.message, loading: false })
-      toast.error("Failed to add item", {
-        description: err.message
+      toast({
+        title: "Failed to add item",
+        description: err.message,
+        variant: "destructive"
       })
     }
   },
@@ -69,7 +75,10 @@ export const useCartStore = create<CartStore>((set, get) => ({
     set((state) => ({
       items: state.items.filter(item => item.id !== id)
     }))
-    toast.success("Removed from cart")
+    toast({
+      title: "Removed from cart",
+      variant: "default"
+    })
   },
   updateQuantity: (id, quantity) => {
     if (quantity < 1) {
@@ -85,7 +94,10 @@ export const useCartStore = create<CartStore>((set, get) => ({
   },
   clearCart: () => {
     set({ items: [] })
-    toast.success("Cart cleared")
+    toast({
+      title: "Cart cleared",
+      variant: "default"
+    })
   },
   setIsOpen: (open) => set({ isOpen: open })
 }))
