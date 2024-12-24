@@ -65,6 +65,7 @@ export function ProductsTable() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null)
+  const [localError, setLocalError] = useState<string | null>(null)
 
 
 
@@ -262,7 +263,7 @@ export function ProductsTable() {
       await refreshProducts() // Refresh the list
     } catch (err) {
       console.error("Error deleting product:", err)
-      setError(err instanceof Error ? err.message : "Failed to delete product")
+      setLocalError(err instanceof Error ? err.message : "Failed to delete product")
     } finally {
       setIsSubmitting(false)
       setDeleteProduct(null)
