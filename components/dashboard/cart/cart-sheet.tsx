@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { ShoppingCart, Minus, Plus, Trash2 } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -18,6 +19,8 @@ export function CartSheet() {
     setIsOpen
   } = useCartStore()
   const { totalItems, subtotal } = useCartTotals()
+  const [phoneNumber, setPhoneNumber] = useState("")
+  const [showReceipt, setShowReceipt] = useState(false)
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -102,7 +105,19 @@ export function CartSheet() {
         </div>
         {items.length > 0 && (
           <div className="sticky bottom-0 border-t p-6 space-y-4 bg-white">
-            <CheckoutDisplay />
+            <CheckoutDisplay 
+              items={items}
+              subtotal={subtotal}
+              phoneNumber={phoneNumber}
+              setPhoneNumber={setPhoneNumber}
+              showReceipt={showReceipt}
+              setShowReceipt={setShowReceipt}
+              onNewOrder={() => {
+                clearCart()
+                setIsOpen(false)
+              }}
+              clearCart={clearCart}
+            />
           </div>
         )}
       </SheetContent>
