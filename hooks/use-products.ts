@@ -16,19 +16,43 @@ const productsCache: {
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const refreshProducts = async () => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        const { data, error: supabaseError } = await supabase
+          .from('products')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (supabaseError) throw supabaseError;
+
+        // Update cache
+        productsCache.data = data || [];
+        productsCache.timestamp = Date.now();
+        
+        setProducts(data || []);
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        setError(err instanceof Error ? err.message : 'Failed to fetch products');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    await fetchProducts();
+  };
 
   useEffect(() => {
     let isCancelled = false;
 
     const fetchProducts = async () => {
-      if (isLoading) return; // Prevent multiple simultaneous requests
-      
       try {
-        setIsLoading(true);
-        setError(null);
-
         // Check cache first
         const now = Date.now();
         if (productsCache.data && (now - productsCache.timestamp) < CACHE_TTL) {
@@ -36,6 +60,9 @@ export function useProducts() {
           setIsLoading(false);
           return;
         }
+
+        setIsLoading(true);
+        setError(null);
         
         const { data, error: supabaseError } = await supabase
           .from('products')
