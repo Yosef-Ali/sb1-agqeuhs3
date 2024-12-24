@@ -60,8 +60,8 @@ export function OrdersGrid({ data }: OrdersGridProps) {
   return (
     <div className="relative">
 
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg p-0">
+      <Sheet open={isOpen} onOpenChange={setIsOpen} className="border-none">
+        <SheetContent side="right" className="w-full sm:max-w-lg p-0 border-none">
           <SheetHeader className="px-6 py-4 border-b">
             <SheetTitle className="text-xl font-semibold">Cart ({totalItems})</SheetTitle>
           </SheetHeader>
