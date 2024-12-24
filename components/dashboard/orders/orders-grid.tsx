@@ -193,7 +193,6 @@ export function OrdersGrid({ data }: OrdersGridProps) {
               </div>
             )}
           </div>
-          )}
         </SheetContent>
       </Sheet>
 
