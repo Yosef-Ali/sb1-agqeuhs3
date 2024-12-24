@@ -163,17 +163,20 @@ export function CheckoutDisplay({
             className="flex-1"
             onClick={() => {
               const receiptText = `
-STORE NAME
-${orderNumber} - ${currentDate}
-${phone ? `Customer: ${phone}\n` : ''}
+*STORE NAME*
+Order #${orderNumber}
+Date: ${currentDate}
+${phone ? `Phone: ${phone}\n` : ''}
+-------------------
 ${items.map(item =>
-                `${item.customer} x${item.quantity}: $${(item.total * item.quantity).toFixed(2)}`
+                `${item.customer} x${item.quantity}
+   $${(item.total * item.quantity).toFixed(2)}`
               ).join('\n')}
-
-Total: $${subtotal.toFixed(2)}
+-------------------
+*Total: $${subtotal.toFixed(2)}*
 
 Thank you for your purchase!`;
-              window.open(`https://wa.me/?text=${encodeURIComponent(receiptText)}`);
+              window.open(`https://wa.me/${phone}?text=${encodeURIComponent(receiptText)}`);
             }}
           >
             <Share className="w-4 h-4 mr-2" />
