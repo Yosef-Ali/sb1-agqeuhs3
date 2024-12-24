@@ -57,8 +57,8 @@ export function CheckoutDisplay({
       </SheetHeader>
       <div className="flex-1 p-6 space-y-4">
         <div className="text-center space-y-2">
-          <h2 className="font-bold text-xl">Order Summary</h2>
-          <p className="text-sm text-gray-500">Transaction #{orderNumber}</p>
+          <h2 className="font-bold text-xl">RECEIPT</h2>
+          <p className="text-sm text-gray-500">Order #{orderNumber}</p>
           <p className="text-sm text-gray-500">{currentDate}</p>
         </div>
 
@@ -96,8 +96,8 @@ export function CheckoutDisplay({
         </div>
 
         <div className="text-center text-sm text-gray-500 pt-4">
-          <p>Thank you for shopping with us!</p>
-          <p>We appreciate your business</p>
+          <p>Thank you for your purchase!</p>
+          <p>Please visit again</p>
         </div>
       </div>
 

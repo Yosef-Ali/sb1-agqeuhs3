@@ -50,8 +50,8 @@ export function CartSheet() {
                 {items.length === 0 ? (
                   <div className="flex h-[400px] flex-col items-center justify-center space-y-2">
                     <ShoppingCart className="h-12 w-12 text-gray-400" />
-                    <p className="text-lg font-medium text-gray-900">No items in cart</p>
-                    <p className="text-gray-500">Browse products and add items to your cart.</p>
+                    <p className="text-lg font-medium text-gray-900">Your cart is empty</p>
+                    <p className="text-gray-500">Add items to get started</p>
                   </div>
                 ) : (
                   <div className="divide-y">
