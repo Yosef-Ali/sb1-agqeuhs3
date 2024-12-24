@@ -172,7 +172,7 @@ export function OrdersTable() {
         </TabsContent>
         <TabsContent value="table">
           <div className="rounded-md border">
-        <Table>
+            <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -219,10 +219,9 @@ export function OrdersTable() {
               </TableRow>
             )}
           </TableBody>
-        </Table>
-      </div>
-      <OrdersTablePagination table={table} />
+            </Table>
           </div>
+          <OrdersTablePagination table={table} />
         </TabsContent>
       </Tabs>
     </div>
