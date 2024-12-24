@@ -182,7 +182,6 @@ export function CartSheet() {
 
               <div className="border-t bg-white sticky bottom-0 p-4">
                 <Button
-                  className="w-full"
                   size="lg"
                   onClick={() => setShowCheckout(true)}
                   disabled={items.length === 0 || !validatePhone(phone)}
