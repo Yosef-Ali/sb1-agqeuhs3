@@ -1,32 +1,21 @@
 import { create } from 'zustand'
 import { toast } from "sonner"
+import { CartItem, CartState } from '@/types/cart'
 
-export type CartItem = {
-  id: string
-  customer: string
-  status: string
-  total: number
-  image?: string
-  quantity: number
-  createdAt?: Date
-}
-
-interface CartStore {
-  items: CartItem[]
+interface CartStore extends CartState {
   isOpen: boolean
   loading: boolean
   error: string | null
-  addItem: (item: Omit<CartItem, "quantity">) => void
+  setIsOpen: (open: boolean) => void
+  addItem: (item: Omit<CartItem, 'quantity'>) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
-  setIsOpen: (open: boolean) => void
-  setLoading: (loading: boolean) => void
-  setError: (error: string | null) => void
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
+  total: 0, // Add this line to match CartState interface
   isOpen: false,
   loading: false,
   error: null,
@@ -34,6 +23,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
     try {
       set({ loading: true, error: null })
       const existingItem = get().items.find(item => item.id === newItem.id)
+      const currentTotal = get().total
       
       if (existingItem) {
         set((state) => ({
@@ -42,43 +32,31 @@ export const useCartStore = create<CartStore>((set, get) => ({
               ? { ...item, quantity: item.quantity + 1 }
               : item
           ),
+          total: currentTotal + newItem.total,
           loading: false
         }))
-        toast({
-          title: "Item already in cart",
-          description: "Quantity has been increased",
-          variant: "default"
-        })
+        toast("Quantity updated") // Fixed toast call
         return
       }
       
       set((state) => ({ 
         items: [...state.items, { ...newItem, quantity: 1, createdAt: new Date() }],
+        total: currentTotal + newItem.total,
         isOpen: true,
         loading: false
       }))
-      toast({
-        title: "Added to cart",
-        description: `${newItem.id} has been added to your cart`,
-        variant: "default"
-      })
-    } catch (err) {
-      set({ error: err.message, loading: false })
-      toast({
-        title: "Failed to add item",
-        description: err.message,
-        variant: "destructive"
-      })
+      toast("Added to cart") // Fixed toast call
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to add item"
+      set({ error: errorMessage, loading: false })
+      toast.error(errorMessage)
     }
   },
   removeItem: (id) => {
     set((state) => ({
       items: state.items.filter(item => item.id !== id)
     }))
-    toast({
-      title: "Removed from cart",
-      variant: "default"
-    })
+    toast("Removed from cart") // Fixed toast call
   },
   updateQuantity: (id, quantity) => {
     if (quantity < 1) {
@@ -94,10 +72,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
   },
   clearCart: () => {
     set({ items: [] })
-    toast({
-      title: "Cart cleared",
-      variant: "default"
-    })
+    toast("Cart cleared") // Fixed toast call
   },
   setIsOpen: (open) => set({ isOpen: open })
 }))

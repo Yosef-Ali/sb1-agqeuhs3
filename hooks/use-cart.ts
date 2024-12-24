@@ -24,7 +24,14 @@ export const useCart = create<CartStore>()(
         if (existingItem) {
           existingItem.quantity += 1
         } else {
-          items.push({ product, quantity: 1 })
+          items.push({
+            id: product.id,
+            product,
+            quantity: 1,
+            customer: '',
+            status: 'pending',
+            total: product.price
+          })
         }
 
         set({

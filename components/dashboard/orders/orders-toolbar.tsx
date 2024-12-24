@@ -20,6 +20,10 @@ interface DataTableToolbarProps<TData> {
 export function OrdersTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
+  const isFiltered = table?.getState().columnFilters.length ?? 0 > 0
+
+  if (!table) return null;
+
   return (
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
@@ -31,27 +35,29 @@ export function OrdersTableToolbar<TData>({
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-        <Select
-          value={(table?.getColumn("status")?.getFilterValue() as string) ?? "all"}
-          onValueChange={(value) =>
-            table?.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
-          }
-        >
-          <SelectTrigger className="h-8 w-[120px]">
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="processing">Processing</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
-          </SelectContent>
-        </Select>
-        {table?.getState().columnFilters.length > 0 && (
+        {table?.getColumn("status") && (
+          <Select
+            value={(table?.getColumn("status")?.getFilterValue() as string) ?? "all"}
+            onValueChange={(value) =>
+              table?.getColumn("status")?.setFilterValue(value === "all" ? "" : value)
+            }
+          >
+            <SelectTrigger className="h-8 w-[120px]">
+              <SelectValue placeholder="Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="processing">Processing</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        )}
+        {isFiltered && (
           <Button
             variant="ghost"
-            onClick={() => table.resetColumnFilters()}
+            onClick={() => table?.resetColumnFilters()}
             className="h-8 px-2 lg:px-3"
           >
             Reset
