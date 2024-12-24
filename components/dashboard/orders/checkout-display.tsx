@@ -49,9 +49,10 @@ export function CheckoutDisplay({
       setShowReceipt(true)
       toast.success("Order placed successfully!")
     } catch (err) {
-      setError(err.message)
+      const errorMessage = err instanceof Error ? err.message : "An unknown error occurred"
+      setError(errorMessage)
       toast.error("Checkout failed", {
-        description: err.message
+        description: errorMessage
       })
     } finally {
       setIsProcessing(false)
