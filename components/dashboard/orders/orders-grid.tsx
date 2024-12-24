@@ -6,6 +6,7 @@ import { useState } from "react"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { ShoppingCart, Minus, Plus } from "lucide-react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet"
 import { useCartStore, useCartTotals } from "@/lib/store/cart-store"
@@ -126,6 +127,30 @@ export function OrdersGrid({ data }: OrdersGridProps) {
             {items.length > 0 && (
               <div className="border-t">
                 <div className="p-6 space-y-4">
+                  <div className="space-y-4">
+                    <div className="flex flex-col space-y-1.5">
+                      <label htmlFor="phone" className="text-sm font-medium">Phone Number</label>
+                      <Input 
+                        id="phone" 
+                        placeholder="Enter your phone number"
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <label htmlFor="coupon" className="text-sm font-medium">Coupon Code</label>
+                      <div className="flex space-x-2">
+                        <Input 
+                          id="coupon" 
+                          placeholder="Enter coupon code"
+                          className="h-9"
+                        />
+                        <Button variant="outline" size="sm" className="h-9">
+                          Apply
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                  <Separator />
                   <div className="flex justify-between">
                     <span className="font-medium">Subtotal</span>
                     <span>
@@ -134,10 +159,6 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                         currency: "USD",
                       }).format(subtotal)}
                     </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="font-medium">Shipping</span>
-                    <span>Free</span>
                   </div>
                 </div>
                 <Separator />
