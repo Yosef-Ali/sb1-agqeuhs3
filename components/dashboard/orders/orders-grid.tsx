@@ -135,19 +135,7 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                 </div>
               )}
             </div>
-            <div className="space-y-1">
-              <p className="font-medium truncate">{order.customer}</p>
-              <p className="text-sm text-gray-500">ID: {order.id}</p>
-              <Badge variant={getStatusColor(order.status)}>
-                {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-              </Badge>
-              <p className="text-sm font-medium">
-                {new Intl.NumberFormat("en-US", {
-                  style: "currency",
-                  currency: "USD",
-                }).format(order.total)}
-              </p>
-            </div>
+            <p className="text-sm text-center text-gray-500">Click to view details</p>
           </div>
         ))}
       </div>
