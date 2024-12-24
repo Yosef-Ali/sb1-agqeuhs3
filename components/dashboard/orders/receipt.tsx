@@ -7,6 +7,10 @@ interface ReceiptProps {
 }
 
 export function Receipt({ items, subtotal, phoneNumber }: ReceiptProps) {
+  const tax = subtotal * 0.1 // 10% tax
+  const total = subtotal + tax
+  const orderNumber = Math.random().toString(36).substr(2, 9).toUpperCase()
+  
   const formatDate = () => {
     return new Date().toLocaleDateString('en-US', {
       year: 'numeric',
@@ -18,20 +22,24 @@ export function Receipt({ items, subtotal, phoneNumber }: ReceiptProps) {
   }
 
   const receiptContent = `
-ORDER RECEIPT
-${formatDate()}
+RECEIPT #${orderNumber}
+Date: ${formatDate()}
 ------------------------
 ${items.map(item => `
 ${item.customer}
-${item.id}
-Qty: ${item.quantity} x $${item.total.toFixed(2)}
-Subtotal: $${(item.quantity * item.total).toFixed(2)}
+Order ID: ${item.id}
+Quantity: ${item.quantity} x $${item.total.toFixed(2)}
+Amount: $${(item.quantity * item.total).toFixed(2)}
 `).join('\n')}
 ------------------------
-Total Items: ${items.reduce((sum, item) => sum + item.quantity, 0)}
+Items: ${items.reduce((sum, item) => sum + item.quantity, 0)}
 Subtotal: $${subtotal.toFixed(2)}
+Tax (10%): $${tax.toFixed(2)}
 ------------------------
-Phone: ${phoneNumber}
+Total: $${total.toFixed(2)}
+------------------------
+Contact: ${phoneNumber}
+Thank you for your order!
   `.trim()
 
   return (

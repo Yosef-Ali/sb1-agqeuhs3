@@ -8,46 +8,62 @@ export type CartItem = {
   total: number
   image?: string
   quantity: number
+  createdAt?: Date
 }
 
 interface CartStore {
   items: CartItem[]
   isOpen: boolean
+  loading: boolean
+  error: string | null
   addItem: (item: Omit<CartItem, "quantity">) => void
   removeItem: (id: string) => void
   updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
   setIsOpen: (open: boolean) => void
+  setLoading: (loading: boolean) => void
+  setError: (error: string | null) => void
 }
 
 export const useCartStore = create<CartStore>((set, get) => ({
   items: [],
   isOpen: false,
-  addItem: (newItem) => {
-    set((state) => {
-      const existingItem = state.items.find(item => item.id === newItem.id)
+  loading: false,
+  error: null,
+  addItem: async (newItem) => {
+    try {
+      set({ loading: true, error: null })
+      const existingItem = get().items.find(item => item.id === newItem.id)
       
       if (existingItem) {
-        toast.info("Item already in cart", {
-          description: "Quantity has been increased"
-        })
-        return {
+        set((state) => ({
           items: state.items.map(item =>
             item.id === newItem.id
               ? { ...item, quantity: item.quantity + 1 }
               : item
-          )
-        }
+          ),
+          loading: false
+        }))
+        toast.info("Item already in cart", {
+          description: "Quantity has been increased"
+        })
+        return
       }
       
+      set((state) => ({ 
+        items: [...state.items, { ...newItem, quantity: 1, createdAt: new Date() }],
+        isOpen: true,
+        loading: false
+      }))
       toast.success("Added to cart", {
         description: `${newItem.id} has been added to your cart`
       })
-      return { 
-        items: [...state.items, { ...newItem, quantity: 1 }],
-        isOpen: true
-      }
-    })
+    } catch (err) {
+      set({ error: err.message, loading: false })
+      toast.error("Failed to add item", {
+        description: err.message
+      })
+    }
   },
   removeItem: (id) => {
     set((state) => ({

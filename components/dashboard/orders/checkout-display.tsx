@@ -26,6 +26,34 @@ export function CheckoutDisplay({
   onNewOrder,
   clearCart,
 }: CheckoutDisplayProps) {
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const handleCheckout = async () => {
+    try {
+      setIsProcessing(true)
+      setError(null)
+      
+      // Validate phone number
+      if (!phoneNumber || phoneNumber.length < 10) {
+        throw new Error("Please enter a valid phone number")
+      }
+
+      // Process checkout logic here
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+      
+      onNewOrder()
+      setShowReceipt(true)
+      toast.success("Order placed successfully!")
+    } catch (err) {
+      setError(err.message)
+      toast.error("Checkout failed", {
+        description: err.message
+      })
+    } finally {
+      setIsProcessing(false)
+    }
+  }
   return (
     <div className="border-t">
       <div className="p-6">
