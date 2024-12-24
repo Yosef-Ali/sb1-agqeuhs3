@@ -96,54 +96,91 @@ export function CheckoutDisplay({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-4">
-        <Input
-          type="tel"
-          placeholder="Phone Number"
-          value={phoneNumber}
-          onChange={(e) => setPhoneNumber(e.target.value)}
-        />
-        <Input
-          type="text"
-          placeholder="Coupon Code (Optional)"
-          value={couponCode}
-          onChange={(e) => setCouponCode(e.target.value)}
-        />
-      </div>
-      <div className="space-y-4">
-        <div className="flex justify-between text-sm">
-          <span>Subtotal</span>
-          <span>{new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD"
-          }).format(subtotal)}</span>
+    <div className="flex flex-col h-full">
+      <SheetHeader className="px-6 py-4 border-b">
+        <SheetTitle>Checkout</SheetTitle>
+      </SheetHeader>
+      <div className="flex-1 overflow-y-auto">
+        <div className="divide-y">
+          {items.map((item) => (
+            <div key={item.id} className="flex gap-4 p-6">
+              <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                <Image
+                  src={item.image || "/placeholder.png"}
+                  alt={item.id}
+                  width={96}
+                  height={96}
+                  className="h-full w-full object-cover object-center"
+                />
+              </div>
+              <div className="flex flex-1 flex-col">
+                <div className="flex justify-between text-base font-medium">
+                  <h3>{item.customer}</h3>
+                  <p className="ml-4">
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                    }).format(item.total * item.quantity)}
+                  </p>
+                </div>
+                <p className="mt-1 text-sm text-gray-500">Order ID: {item.id}</p>
+                <div className="flex flex-1 items-end justify-between text-sm">
+                  <p>Qty {item.quantity}</p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-        {couponCode && (
-          <div className="flex justify-between text-sm text-green-600">
-            <span>Discount</span>
-            <span>-$0.00</span>
+      </div>
+      <div className="border-t bg-white p-6 space-y-4">
+        <div className="space-y-4">
+          <Input
+            type="tel"
+            placeholder="Phone Number"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+          />
+          <Input
+            type="text"
+            placeholder="Coupon Code (Optional)"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value)}
+          />
+        </div>
+        <div className="space-y-4">
+          <div className="flex justify-between text-sm">
+            <span>Subtotal</span>
+            <span>{new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            }).format(subtotal)}</span>
           </div>
-        )}
-        <div className="flex justify-between font-medium">
-          <span>Total</span>
-          <span>{new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD"
-          }).format(subtotal)}</span>
+          {couponCode && (
+            <div className="flex justify-between text-sm text-green-600">
+              <span>Discount</span>
+              <span>-$0.00</span>
+            </div>
+          )}
+          <div className="flex justify-between font-medium">
+            <span>Total</span>
+            <span>{new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD"
+            }).format(subtotal)}</span>
+          </div>
         </div>
+        <Button
+          className="w-full"
+          size="lg"
+          onClick={handleCheckout}
+          disabled={isProcessing}
+        >
+          {isProcessing ? "Processing..." : "Checkout"}
+        </Button>
+        {error && (
+          <p className="text-sm text-red-500 text-center">{error}</p>
+        )}
       </div>
-      <Button
-        className="w-full"
-        size="lg"
-        onClick={handleCheckout}
-        disabled={isProcessing}
-      >
-        {isProcessing ? "Processing..." : "Checkout"}
-      </Button>
-      {error && (
-        <p className="text-sm text-red-500 text-center">{error}</p>
-      )}
     </div>
   )
 }
