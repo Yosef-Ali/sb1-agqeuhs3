@@ -21,6 +21,21 @@ interface OrdersGridProps {
   data: Order[]
 }
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case "pending":
+      return "warning" as const
+    case "processing":
+      return "default" as const
+    case "completed":
+      return "success" as const
+    case "cancelled":
+      return "destructive" as const
+    default:
+      return "secondary" as const
+  }
+}
+
 export function OrdersGrid({ data }: OrdersGridProps) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [cartItems, setCartItems] = useState<Order[]>([])
@@ -134,22 +149,8 @@ export function OrdersGrid({ data }: OrdersGridProps) {
               </p>
             </div>
           </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
-}
-
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case "pending":
-      return "warning" as const
-    case "processing":
-      return "default" as const
-    case "completed":
-      return "success" as const
-    case "cancelled":
-      return "destructive" as const
-    default:
-      return "secondary" as const
-  }
 }
