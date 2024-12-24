@@ -3,6 +3,7 @@ import { CartItem } from "@/lib/store/cart-store"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
+import { SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Printer, Share } from "lucide-react"
 import { Receipt } from "./receipt"
 
