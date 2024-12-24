@@ -4,6 +4,16 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { Product } from '@/types/product';
 
+// Cache configuration
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+const productsCache: {
+  data: Product[] | null;
+  timestamp: number;
+} = {
+  data: null,
+  timestamp: 0,
+};
+
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -18,6 +28,14 @@ export function useProducts() {
       try {
         setIsLoading(true);
         setError(null);
+
+        // Check cache first
+        const now = Date.now();
+        if (productsCache.data && (now - productsCache.timestamp) < CACHE_TTL) {
+          setProducts(productsCache.data);
+          setIsLoading(false);
+          return;
+        }
         
         const { data, error: supabaseError } = await supabase
           .from('products')
@@ -29,6 +47,10 @@ export function useProducts() {
         }
 
         if (!isCancelled) {
+          // Update cache
+          productsCache.data = data || [];
+          productsCache.timestamp = now;
+          
           setProducts(data || []);
         }
       } catch (err) {
