@@ -69,7 +69,13 @@ export function OrdersGrid({ data }: OrdersGridProps) {
             </SheetTitle>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto">
-            {items.length > 0 ? (
+            {items.length === 0 ? (
+              <div className="flex h-[400px] flex-col items-center justify-center space-y-2">
+                <ShoppingCart className="h-12 w-12 text-gray-400" />
+                <p className="text-lg font-medium text-gray-900">Your cart is empty</p>
+                <p className="text-gray-500">Add items to get started.</p>
+              </div>
+            ) : (
               <div className="divide-y">
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-4 p-6">
@@ -125,46 +131,19 @@ export function OrdersGrid({ data }: OrdersGridProps) {
                   </div>
                 ))}
               </div>
-            ) : items.length === 0 ? (
-              <div className="flex h-[400px] flex-col items-center justify-center space-y-2">
-                <ShoppingCart className="h-12 w-12 text-gray-400" />
-                <p className="text-lg font-medium text-gray-900">Your cart is empty</p>
-                <p className="text-gray-500">Add items to get started.</p>
-              </div>
-            ) : (
-              <>
-                <div className="flex-1 px-6">
-                  <CheckoutDisplay
-                    items={items}
-                    subtotal={subtotal}
-                    phoneNumber={phoneNumber}
-                    setPhoneNumber={setPhoneNumber}
-                    showReceipt={showReceipt}
-                    setShowReceipt={setShowReceipt}
-                    onNewOrder={() => {
-                      clearCart()
-                      setPhoneNumber("")
-                    }}
-                    clearCart={clearCart}
-                  />
-                </div>
-                <div className="border-t p-6">
-                  <div className="flex justify-between mb-4">
-                    <span className="font-medium">Total</span>
-                    <span className="font-medium">
-                      {new Intl.NumberFormat("en-US", {
-                        style: "currency",
-                        currency: "USD",
-                      }).format(subtotal)}
-                    </span>
-                  </div>
-                  <Button className="w-full" size="lg" onClick={() => setShowReceipt(true)}>
-                    Checkout
-                  </Button>
-                </div>
-              </>
             )}
           </div>
+          {items.length > 0 && (
+            <div className="border-t p-6">
+              <Button 
+                className="w-full" 
+                size="lg" 
+                onClick={() => setShowReceipt(true)}
+              >
+                Proceed to Checkout
+              </Button>
+            </div>
+          )}
         </SheetContent>
       </Sheet>
 
