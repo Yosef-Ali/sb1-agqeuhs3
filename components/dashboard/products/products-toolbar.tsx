@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Cross2Icon, PlusIcon } from "@radix-ui/react-icons"
 import { Table } from "@tanstack/react-table"
+import { useProducts } from "@/hooks/use-products"
 import { ProductForm } from "./product-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,6 +27,7 @@ export function ProductsTableToolbar<TData>({
   const [showAddProduct, setShowAddProduct] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const { toast } = useToast()
+  const { refreshProducts } = useProducts()
 
   const handleError = (error: string) => {
     toast({
@@ -87,9 +89,12 @@ export function ProductsTableToolbar<TData>({
         </Button>
         {table && <DataTableViewOptions table={table} />}
       </div>
-      <ProductForm 
-        open={showAddProduct} 
-        onClose={() => setShowAddProduct(false)}
+      <ProductForm
+        open={showAddProduct}
+        onClose={async () => {
+          setShowAddProduct(false);
+          await refreshProducts();
+        }}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
         onError={handleError}

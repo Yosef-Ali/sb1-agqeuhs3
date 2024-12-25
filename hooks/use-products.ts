@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase/client';
 import { Product } from '@/types/product';
+import { useEffect, useState } from 'react';
 
 // Cache configuration
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
@@ -20,42 +20,38 @@ export function useProducts() {
   const [error, setError] = useState<string | null>(null);
 
   const refreshProducts = async () => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        console.log('📡 Calling Supabase products.select()');
-        const { data, error: supabaseError } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
+    try {
+      setIsLoading(true);
+      setError(null);
 
-        if (supabaseError) {
-          console.error('❌ Supabase error:', supabaseError);
-          throw supabaseError;
-        }
+      console.log('📡 Calling Supabase products.select()');
+      const { data, error: supabaseError } = await supabase
+        .from('products')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-        console.log('✅ API Success:', {
-          productsCount: data?.length || 0,
-          firstProduct: data?.[0],
-          timestamp: new Date().toISOString()
-        });
-
-        // Update cache
-        productsCache.data = data || [];
-        productsCache.timestamp = Date.now();
-        
-        setProducts(data || []);
-      } catch (err) {
-        console.error('Error fetching products:', err);
-        setError(err instanceof Error ? err.message : 'Failed to fetch products');
-      } finally {
-        setIsLoading(false);
+      if (supabaseError) {
+        console.error('❌ Supabase error:', supabaseError);
+        throw supabaseError;
       }
-    };
 
-    await fetchProducts();
+      console.log('✅ API Success:', {
+        productsCount: data?.length || 0,
+        firstProduct: data?.[0],
+        timestamp: new Date().toISOString()
+      });
+
+      // Clear cache and update with fresh data
+      productsCache.data = data || [];
+      productsCache.timestamp = Date.now();
+
+      setProducts(data || []);
+    } catch (err) {
+      console.error('Error fetching products:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch products');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -79,27 +75,40 @@ export function useProducts() {
 
         setIsLoading(true);
         setError(null);
-        
+
         const { data, error: supabaseError } = await supabase
           .from('products')
           .select('*')
           .order('created_at', { ascending: false });
 
         if (supabaseError) {
-          throw supabaseError;
+          console.error('Supabase error:', supabaseError);
+          throw new Error(`Failed to fetch products: ${supabaseError.message}`);
+        }
+
+        if (!data) {
+          console.warn('No data received from Supabase');
+          throw new Error('No data received from the server');
+        }
+
+        if (!Array.isArray(data)) {
+          console.error('Invalid data format received:', data);
+          throw new Error('Invalid data format received from the server');
         }
 
         if (!isCancelled) {
           // Update cache
-          productsCache.data = data || [];
+          productsCache.data = data;
           productsCache.timestamp = now;
-          
-          setProducts(data || []);
+
+          setProducts(data);
+          console.log('Successfully loaded', data.length, 'products');
         }
       } catch (err) {
         if (!isCancelled) {
-          console.error('Error fetching products:', err);
-          setError(err instanceof Error ? err.message : 'Failed to fetch products');
+          const errorMessage = err instanceof Error ? err.message : 'Failed to fetch products';
+          console.error('Error in fetchProducts:', errorMessage, err);
+          setError(errorMessage);
         }
       } finally {
         if (!isCancelled) {

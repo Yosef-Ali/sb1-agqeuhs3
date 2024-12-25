@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from "react"
 import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
+import Image from "next/image"
 import { ImageUpload } from "@/components/ui/image-upload"
 import {
   Sheet,
@@ -20,8 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-
-import { Product } from "@/types/product"
+import { Product } from "@/types/product" // Import Product type
 import { Button } from "@/components/ui/button"
 
 interface ProductFormProps {
@@ -31,6 +31,14 @@ interface ProductFormProps {
   isLoading?: boolean
   setIsLoading?: (loading: boolean) => void
   onError?: (error: string) => void
+}
+
+interface FormErrors {
+  name?: string;
+  category?: string;
+  price?: string;
+  stock_quantity?: string;
+  description?: string;
 }
 
 export function ProductForm({
@@ -48,7 +56,10 @@ export function ProductForm({
   const [category, setCategory] = useState("")
   const [stockQuantity, setStockQuantity] = useState("")
   const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imageUrl, setImageUrl] = useState<string | null>(null)
+  const [imageUrl, setImageUrl] = useState<string | undefined>(undefined) // Initialize as undefined
+  const [error, setError] = useState<string | null>(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [errors, setErrors] = useState<FormErrors>({})
 
   useEffect(() => {
     if (product) {
@@ -57,33 +68,39 @@ export function ProductForm({
       setPrice(product.price?.toString() || "")
       setCategory(product.category || "")
       setStockQuantity(product.stock_quantity?.toString() || "")
-      setImageUrl(product.image_url || null)
+      setImageUrl(product.image_url || undefined) // Set as undefined
     } else {
       resetForm()
     }
   }, [product, open])
 
-  const resetForm = () => {
+  const resetForm = async () => {
     setName("")
     setDescription("")
     setPrice("")
     setCategory("")
     setStockQuantity("")
     setImageFile(null)
-    setImageUrl(null)
+    setImageUrl(undefined) // Set as undefined
+
+    // Wait for state updates to complete
+    await new Promise(resolve => setTimeout(resolve, 0))
   }
 
-  const uploadImage = async (file: File): Promise<string | null> => {
+  const uploadImage = async (file: File): Promise<string | undefined> => { // Return type as string | undefined
+    console.log('Starting image upload')
     try {
       const fileExt = file.name.split('.').pop()
       const fileName = `${Date.now()}.${fileExt}`
-      const filePath = `product-images/${fileName}`
+      // Removed 'product-images/' prefix from filePath
+      const filePath = `${fileName}`
 
       const { error: uploadError } = await supabase.storage
         .from('product-images')
         .upload(filePath, file)
 
       if (uploadError) {
+        console.error('Upload error:', uploadError.message) // Enhanced error logging
         throw uploadError
       }
 
@@ -91,70 +108,104 @@ export function ProductForm({
         .from('product-images')
         .getPublicUrl(filePath)
 
+      console.log('Image uploaded to:', publicUrl)
       return publicUrl
-    } catch (error) {
-      console.error('Supabase storage error:', error)
+    } catch (error: any) { // Added type for better error handling
+      console.error('Supabase storage error:', error.message || error)
       onError?.('Failed to upload image')
-      return null
+      return undefined // Return undefined on error
     }
   }
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {}
+    
+    if (!name.trim()) {
+      newErrors.name = "Name is required"
+    }
+    if (!category.trim()) {
+      newErrors.category = "Category is required"
+    }
+    if (!price || parseFloat(price) <= 0) {
+      newErrors.price = "Valid price is required"
+    }
+    if (!stockQuantity || parseInt(stockQuantity) < 0) {
+      newErrors.stock_quantity = "Valid stock quantity is required"
+    }
+    if (!description.trim()) {
+      newErrors.description = "Description is required"
+    }
 
-    if (setIsLoading) setIsLoading(true)
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setSubmitting(true);
+
+    if (!validateForm()) {
+      setSubmitting(false);
+      return;
+    }
 
     try {
-      // Upload image if a new file is selected
-      let finalImageUrl = imageUrl
-      if (imageFile) {
-        const uploadedImageUrl = await uploadImage(imageFile)
-        if (uploadedImageUrl) finalImageUrl = uploadedImageUrl
+      // Validate required fields
+      const requiredFields = ['name', 'category', 'price', 'stock_quantity', 'description'];
+      const formData = new FormData(event.target as HTMLFormElement);
+      const values = Object.fromEntries(formData.entries());
+      
+      const missingFields = requiredFields.filter(field => !values[field]);
+      if (missingFields.length > 0) {
+        throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
       }
 
-      const productData = {
-        name,
-        description,
-        price: parseFloat(price),
-        category,
-        stock_quantity: parseInt(stockQuantity),
-        image_url: finalImageUrl,
+      // Process image if exists
+      let imageUrl = product?.image_url;
+      const imageFile = formData.get('image') as File;
+      if (imageFile && imageFile.size > 0) {
+        console.log('Starting image upload');
+        imageUrl = await uploadImage(imageFile);
+        console.log('Image uploaded to:', imageUrl);
       }
 
-      let result;
-      if (product) {
-        // Update existing product
-        result = await supabase
-          .from("products")
-          .update(productData)
-          .eq("id", product.id)
-      } else {
-        // Add new product
-        result = await supabase
-          .from("products")
-          .insert(productData)
-      }
+      // Prepare data for submission
+      const submitData = {
+        name: values.name,
+        category: values.category,
+        price: parseFloat(values.price as string),
+        stock_quantity: parseInt(values.stock_quantity as string, 10),
+        description: values.description,
+        image_url: imageUrl,
+        organic: values.organic === 'on',
+        updated_at: new Date().toISOString()
+      };
 
-      if (result.error) throw result.error
+      // Submit to database
+      const { error: submitError } = product?.id 
+        ? await supabase
+            .from('products')
+            .update(submitData)
+            .eq('id', product.id)
+        : await supabase
+            .from('products')
+            .insert([submitData]);
 
-      toast({
-        title: product ? "Product Updated" : "Product Added",
-        description: `${name} has been successfully ${product ? 'updated' : 'added'}.`,
-      })
+      if (submitError) throw submitError;
 
-      resetForm()
-      onClose()
-    } catch (error) {
-      console.error("Error saving product:", error)
-      onError?.(`Failed to ${product ? 'update' : 'add'} product`)
+      onClose();
+    } catch (err) {
+      console.error('Error saving product:', err);
+      setError(err instanceof Error ? err.message : 'Failed to save product');
     } finally {
-      if (setIsLoading) setIsLoading(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="sm:max-w-2xl">
+      <SheetContent className="sm:max-w-lg p-6 space-y-6"> {/* Standard ShadCN width and padding */}
         <SheetHeader>
           <SheetTitle>{product ? "Edit Product" : "Add Product"}</SheetTitle>
           <SheetDescription>
@@ -163,7 +214,7 @@ export function ProductForm({
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-8">
 
-          <div className="space-y-8">
+          <div className="space-y-6"> {/* Standard ShadCN gap between elements */}
             <div className="space-y-3">
               <Label htmlFor="name">Product Name</Label>
               <Input
@@ -172,22 +223,24 @@ export function ProductForm({
                 onChange={(e) => setName(e.target.value)}
                 required
                 placeholder="Enter product name"
+                className={errors.name ? "border-red-500" : ""}
               />
+              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div className="space-y-3">
               <Label htmlFor="category">Category</Label>
               <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger id="category">
+                <SelectTrigger id="category" className={errors.category ? "border-red-500" : ""}>
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="electronics">Electronics</SelectItem>
-                  <SelectItem value="clothing">Clothing</SelectItem>
-                  <SelectItem value="books">Books</SelectItem>
+                  <SelectItem value="fruits">Fruits</SelectItem>
+                  <SelectItem value="vegetables">Vegetables</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
+              {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
             </div>
 
             <div className="space-y-3">
@@ -197,7 +250,9 @@ export function ProductForm({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Enter product description"
+                className={errors.description ? "border-red-500" : ""}
               />
+              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
             </div>
 
             <div className="space-y-3">
@@ -211,7 +266,9 @@ export function ProductForm({
                 placeholder="Enter price"
                 step="0.01"
                 min="0"
+                className={errors.price ? "border-red-500" : ""}
               />
+              {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
             </div>
 
             <div className="space-y-3">
@@ -224,30 +281,29 @@ export function ProductForm({
                 required
                 placeholder="Enter stock quantity"
                 min="0"
+                className={errors.stock_quantity ? "border-red-500" : ""}
               />
+              {errors.stock_quantity && <p className="text-red-500 text-sm mt-1">{errors.stock_quantity}</p>}
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             <Label>Product Image</Label>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <ImageUpload
-                  onChange={(file) => setImageFile(file)}
-                />
-              </div>
+            <div className="flex items-center space-x-4">
+              <ImageUpload
+                onChange={(file) => setImageFile(file)}
+              />
               {imageUrl && (
-                <div className="flex items-center justify-center">
-                  <img
-                    src={imageUrl}
-                    alt="Existing product image"
-                    className="max-w-[200px] max-h-[200px] object-cover rounded-md"
-                  />
-                </div>
+                <Image
+                  src={imageUrl}
+                  alt="Existing product image"
+                  className="object-cover rounded-md"
+                  width={100}
+                  height={100}
+                />
               )}
             </div>
           </div>
-
           <div className="flex justify-end space-x-4 pt-4">
             <Button
               variant="outline"

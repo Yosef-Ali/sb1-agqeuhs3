@@ -33,16 +33,7 @@ export function LoginForm() {
 
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
-          // Check if user exists but with different provider
-          const { data: { users } } = await supabase.auth.admin.listUsers({
-            filter: {
-              email: email
-            }
-          })
-          
-          if (users?.length > 0) {
-            throw new Error('This email is registered with a different login method. Please try signing in with Google.')
-          }
+          throw new Error('Invalid email or password. Please try again or sign in with Google.')
         }
         throw error
       }
@@ -51,7 +42,7 @@ export function LoginForm() {
         title: 'Success',
         description: 'You have successfully signed in.',
       })
-      
+
       router.refresh()
       router.push('/dashboard')
     } catch (error) {

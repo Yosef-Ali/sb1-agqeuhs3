@@ -43,7 +43,7 @@ export function CartItem({
             {new Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "USD",
-            }).format(Number(total) * quantity)}
+            }).format(parseFloat(total.toString()) * parseInt(quantity.toString()))}
           </p>
         </div>
         <p className="mt-1 text-sm text-gray-500">Order ID: {id}</p>
@@ -57,7 +57,19 @@ export function CartItem({
             >
               <Minus className="h-4 w-4" />
             </Button>
-            <span className="w-8 text-center">{quantity}</span>
+            <input
+              type="number"
+              value={quantity}
+              onChange={(e) => {
+                const value = parseInt(e.target.value);
+                if (!isNaN(value) && value >= 0) {
+                  onUpdateQuantity(id, value);
+                }
+              }}
+              className="w-12 text-center border rounded-md h-8"
+              min="0"
+              max="99"
+            />
             <Button
               variant="outline"
               size="icon"

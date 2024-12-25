@@ -3,14 +3,6 @@ import { cookies } from 'next/headers'
 import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
-  return handleAuth(request)
-}
-
-export async function POST(request: Request) {
-  return handleAuth(request)
-}
-
-async function handleAuth(request: Request) {
   try {
     const requestUrl = new URL(request.url)
     const code = requestUrl.searchParams.get('code')
