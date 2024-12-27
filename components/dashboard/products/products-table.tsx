@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useProductsContext } from "@/components/providers/products-provider"
 import {
   ColumnFiltersState,
   SortingState,
@@ -26,15 +25,13 @@ import { createColumns } from "./columns"
 import { TableLoading } from "./table-loading"
 import { Product } from "@/types/product" // Import Product type
 import { ProductModals } from "./product-modals" // Import ProductModals component
-import { supabase } from "@/lib/supabase/client" // Import supabase client
 import { Sheet, SheetContent } from "@/components/ui/sheet" // Add this import
 import Image from "next/image"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
-import { CreateProduct } from "./create-product"
+import { useProducts } from '@/hooks/use-products'  // Update import
+import { useToast } from '@/hooks/use-toast'
 
 export function ProductsTable() {
-  const { products, isLoading, error, refreshProducts } = useProductsContext()
+  
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -43,7 +40,14 @@ export function ProductsTable() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
-  const [showCreateProduct, setShowCreateProduct] = useState(false)
+  const { 
+    products, 
+    isLoading, 
+    error, 
+    deleteProduct: deleteProductOp,
+    refreshProducts, // Add this line
+  } = useProducts()
+  const { toast } = useToast()
 
   const handleEdit = (product: Product) => {
     setSelectedProduct(product)
@@ -61,20 +65,22 @@ export function ProductsTable() {
   }
 
   const handleDeleteConfirm = async () => {
-    if (!deleteProduct) return
+    if (!deleteProduct?.id) return
 
     try {
-      const { error: deleteError } = await supabase
-        .from("products")
-        .delete()
-        .eq("id", deleteProduct.id)
-
-      if (deleteError) throw deleteError
-
+      await deleteProductOp(deleteProduct.id)
+      toast({
+        title: "Success",
+        description: "Product deleted successfully",
+      })
       await refreshProducts()
       setDeleteProduct(null)
     } catch (error) {
-      console.error("Error deleting product:", error)
+      toast({
+        title: "Error",
+        description: "Failed to delete product",
+        variant: "destructive",
+      })
     }
   }
 
@@ -122,9 +128,9 @@ export function ProductsTable() {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -188,12 +194,7 @@ export function ProductsTable() {
           </div>
         </SheetContent>
       </Sheet>
-
-      <CreateProduct 
-        open={showCreateProduct}
-        onClose={() => setShowCreateProduct(false)}
-        onSuccess={handleCreateSuccess}
-      />
     </div>
   )
 }
+

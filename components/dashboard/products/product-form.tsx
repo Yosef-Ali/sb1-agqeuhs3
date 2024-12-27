@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select"
 import { Product } from "@/types/product" // Import Product type
 import { Button } from "@/components/ui/button"
+import { useProducts, ProductWithImage } from '@/hooks/use-products'  // Add ProductWithImage to import
 
 interface ProductFormProps {
   open: boolean
@@ -45,9 +46,6 @@ export function ProductForm({
   open,
   onClose,
   product,
-  isLoading,
-  setIsLoading,
-  onError,
 }: ProductFormProps) {
   const { toast } = useToast()
   const [name, setName] = useState("")
@@ -60,6 +58,7 @@ export function ProductForm({
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
+  const { createProduct, updateProduct, isLoading } = useProducts()
 
   useEffect(() => {
     if (product) {
@@ -87,36 +86,6 @@ export function ProductForm({
     await new Promise(resolve => setTimeout(resolve, 0))
   }
 
-  const uploadImage = async (file: File): Promise<string | undefined> => { // Return type as string | undefined
-    console.log('Starting image upload')
-    try {
-      const fileExt = file.name.split('.').pop()
-      const fileName = `${Date.now()}.${fileExt}`
-      // Removed 'product-images/' prefix from filePath
-      const filePath = `${fileName}`
-
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file)
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError.message) // Enhanced error logging
-        throw uploadError
-      }
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath)
-
-      console.log('Image uploaded to:', publicUrl)
-      return publicUrl
-    } catch (error: any) { // Added type for better error handling
-      console.error('Supabase storage error:', error.message || error)
-      onError?.('Failed to upload image')
-      return undefined // Return undefined on error
-    }
-  }
-
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
     
@@ -140,68 +109,45 @@ export function ProductForm({
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    setError(null);
-    setSubmitting(true);
-
-    if (!validateForm()) {
-      setSubmitting(false);
-      return;
-    }
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    
+    if (!validateForm()) return
 
     try {
-      // Validate required fields
-      const requiredFields = ['name', 'category', 'price', 'stock_quantity', 'description'];
-      const formData = new FormData(event.target as HTMLFormElement);
-      const values = Object.fromEntries(formData.entries());
-      
-      const missingFields = requiredFields.filter(field => !values[field]);
-      if (missingFields.length > 0) {
-        throw new Error(`Please fill in all required fields: ${missingFields.join(', ')}`);
-      }
-
-      // Process image if exists
-      let imageUrl = product?.image_url;
-      const imageFile = formData.get('image') as File;
-      if (imageFile && imageFile.size > 0) {
-        console.log('Starting image upload');
-        imageUrl = await uploadImage(imageFile);
-        console.log('Image uploaded to:', imageUrl);
-      }
-
-      // Prepare data for submission
-      const submitData = {
-        name: values.name,
-        category: values.category,
-        price: parseFloat(values.price as string),
-        stock_quantity: parseInt(values.stock_quantity as string, 10),
-        description: values.description,
+      const productData: ProductWithImage = {
+        name,
+        description,
+        price: parseFloat(price),
+        category,
+        stock_quantity: parseInt(stockQuantity),
         image_url: imageUrl,
-        organic: values.organic === 'on',
-        updated_at: new Date().toISOString()
-      };
+        imageFile: imageFile
+      }
 
-      // Submit to database
-      const { error: submitError } = product?.id 
-        ? await supabase
-            .from('products')
-            .update(submitData)
-            .eq('id', product.id)
-        : await supabase
-            .from('products')
-            .insert([submitData]);
+      if (product?.id) {
+        await updateProduct(product.id, productData)
+        toast({
+          title: "Success",
+          description: "Product updated successfully",
+        })
+      } else {
+        await createProduct(productData)
+        toast({
+          title: "Success",
+          description: "Product created successfully",
+        })
+      }
 
-      if (submitError) throw submitError;
-
-      onClose();
-    } catch (err) {
-      console.error('Error saving product:', err);
-      setError(err instanceof Error ? err.message : 'Failed to save product');
-    } finally {
-      setSubmitting(false);
+      onClose()
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save product",
+        variant: "destructive",
+      })
     }
-  };
+  }
 
   return (
     <Sheet open={open} onOpenChange={onClose}>

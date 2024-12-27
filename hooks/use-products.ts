@@ -5,50 +5,179 @@ import { Product } from '@/types/product';
 import { useEffect, useState } from 'react';
 
 // Cache configuration
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
-const productsCache: {
-  data: Product[] | null;
-  timestamp: number;
-} = {
-  data: null,
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const productsCache = {
+  data: null as Product[] | null,
   timestamp: 0,
 };
+
+interface ImageUploadResponse {
+  url?: string;
+  error?: string;
+}
+
+export interface ProductWithImage extends Partial<Product> {
+  imageFile?: File | null;  // Update to allow null
+  status?: string;          // Add status property
+}
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // CRUD Operations
+  const uploadProductImage = async (file: File): Promise<ImageUploadResponse> => {
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random()}.${fileExt}`
+      const filePath = fileName
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file)
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError)
+        return { error: uploadError.message }
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath)
+
+      return { url: publicUrl }
+    } catch (error) {
+      console.error('Image upload error:', error)
+      return { error: 'Failed to upload image' }
+    }
+  }
+
+  const createProduct = async (data: ProductWithImage): Promise<Product> => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Basic validation
+      if (!data.name || !data.price) {
+        throw new Error('Name and price are required');
+      }
+
+      let productData = { ...data };
+      const imageFile = productData.imageFile;
+      delete productData.imageFile;
+
+      // Image upload handling
+      if (imageFile) {
+        const { url, error: uploadError } = await uploadProductImage(imageFile);
+        if (uploadError) {
+          throw new Error(`Image upload failed: ${uploadError}`);
+        }
+        productData.image_url = url;
+      }
+
+      // Create product
+      const { data: newProduct, error: insertError } = await supabase
+        .from('products')
+        .insert([{
+          ...productData,
+          created_at: new Date().toISOString(),
+          status: productData.status || 'in-stock',
+        }])
+        .select()
+        .single();
+
+      if (insertError) {
+        throw new Error(`Database error: ${insertError.message}`);
+      }
+
+      if (!newProduct) {
+        throw new Error('Failed to create product: No data returned');
+      }
+
+      await refreshProducts();
+      return newProduct;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to create product';
+      setError(message);
+      throw new Error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateProduct = async (id: string, data: ProductWithImage): Promise<Product> => {
+    setIsLoading(true);
+    try {
+      let productData = { ...data };
+      const imageFile = productData.imageFile || null;
+      delete productData.imageFile;
+
+      if (imageFile) {  // Changed condition to check for non-null
+        const { url, error: uploadError } = await uploadProductImage(imageFile);
+        if (uploadError) throw new Error(uploadError);
+        productData.image_url = url;
+      }
+
+      const { data: updatedProduct, error } = await supabase
+        .from('products')
+        .update(productData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      await refreshProducts();
+      return updatedProduct;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to update product';
+      setError(message);
+      throw new Error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteProduct = async (id: string): Promise<void> => {
+    setIsLoading(true);
+    try {
+      const { error: deleteError } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) throw deleteError;
+      await refreshProducts();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to delete product';
+      setError(message);
+      throw new Error(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const refreshProducts = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      console.log('📡 Calling Supabase products.select()');
-      const { data, error: supabaseError } = await supabase
+      const { data, error: fetchError } = await supabase
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (supabaseError) {
-        console.error('❌ Supabase error:', supabaseError);
-        throw supabaseError;
-      }
+      if (fetchError) throw fetchError;
 
-      console.log('✅ API Success:', {
-        productsCount: data?.length || 0,
-        firstProduct: data?.[0],
-        timestamp: new Date().toISOString()
-      });
-
-      // Clear cache and update with fresh data
+      // Update cache
       productsCache.data = data || [];
       productsCache.timestamp = Date.now();
 
       setProducts(data || []);
     } catch (err) {
-      console.error('Error fetching products:', err);
-      setError(err instanceof Error ? err.message : 'Failed to fetch products');
+      const message = err instanceof Error ? err.message : 'Failed to fetch products';
+      setError(message);
+      throw new Error(message);
     } finally {
       setIsLoading(false);
     }
@@ -62,57 +191,15 @@ export function useProducts() {
         // Check cache first
         const now = Date.now();
         if (productsCache.data && (now - productsCache.timestamp) < CACHE_TTL) {
-          console.log('📦 Cache hit:', {
-            cacheAge: Math.round((now - productsCache.timestamp) / 1000) + 's',
-            products: productsCache.data.length,
-            timestamp: new Date().toISOString()
-          });
           setProducts(productsCache.data);
-          setIsLoading(false);
           return;
         }
-        console.log('🔍 Cache miss or expired, fetching fresh data');
 
-        setIsLoading(true);
-        setError(null);
-
-        const { data, error: supabaseError } = await supabase
-          .from('products')
-          .select('*')
-          .order('created_at', { ascending: false });
-
-        if (supabaseError) {
-          console.error('Supabase error:', supabaseError);
-          throw new Error(`Failed to fetch products: ${supabaseError.message}`);
-        }
-
-        if (!data) {
-          console.warn('No data received from Supabase');
-          throw new Error('No data received from the server');
-        }
-
-        if (!Array.isArray(data)) {
-          console.error('Invalid data format received:', data);
-          throw new Error('Invalid data format received from the server');
-        }
-
-        if (!isCancelled) {
-          // Update cache
-          productsCache.data = data;
-          productsCache.timestamp = now;
-
-          setProducts(data);
-          console.log('Successfully loaded', data.length, 'products');
-        }
+        await refreshProducts();
       } catch (err) {
         if (!isCancelled) {
-          const errorMessage = err instanceof Error ? err.message : 'Failed to fetch products';
-          console.error('Error in fetchProducts:', errorMessage, err);
-          setError(errorMessage);
-        }
-      } finally {
-        if (!isCancelled) {
-          setIsLoading(false);
+          const message = err instanceof Error ? err.message : 'Failed to fetch products';
+          setError(message);
         }
       }
     };
@@ -124,5 +211,13 @@ export function useProducts() {
     };
   }, []);
 
-  return { products, isLoading, error, refreshProducts };
+  return {
+    products,
+    isLoading,
+    error,
+    refreshProducts,
+    createProduct,
+    updateProduct,
+    deleteProduct,
+  };
 }
