@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, FormEvent } from "react"
-import { supabase } from "@/lib/supabase/client"
 import { useToast } from "@/hooks/use-toast"
 import { Input } from "@/components/ui/input"
 import Image from "next/image"
@@ -25,7 +24,12 @@ import { Product } from "@/types/product" // Import Product type
 import { Button } from "@/components/ui/button"
 import { useProducts, ProductWithImage } from '@/hooks/use-products'
 import { useCategories } from '@/hooks/use-categories'
-import { Category } from '@/lib/supabase/types'  // Import Category from types
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableRow,
+} from "@/components/ui/table"
 
 interface ProductFormProps {
   open: boolean
@@ -55,11 +59,9 @@ export function ProductForm({
   const [description, setDescription] = useState("")
   const [price, setPrice] = useState("")
   const [category, setCategory] = useState("")
-  const [stockQuantity, setStockQuantity] = useState("")
+  const [stockQuantity, setStockQuantity] = useState<number | undefined>(undefined)
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imageUrl, setImageUrl] = useState<string | undefined>(undefined) // Initialize as undefined
-  const [error, setError] = useState<string | null>(null)
-  const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [unit, setUnit] = useState("") // Add state for unit
   const { createProduct, updateProduct, isLoading } = useProducts(undefined) // Pass undefined explicitly
@@ -67,13 +69,19 @@ export function ProductForm({
 
   useEffect(() => {
     if (product) {
+      console.log('Product data:', product); // Debug product data
       setName(product.name || "")
       setDescription(product.description || "")
       setPrice(product.price?.toString() || "")
-      setCategory(product.category || "") // This should now be category_id
-      setStockQuantity(product.stock_quantity?.toString() || "")
-      setUnit(product.unit || "") // Initialize unit
-      setImageUrl(product.image_url || undefined) // Set as undefined
+      setCategory(product.category || "") // Use category
+      // Fix stock quantity initialization
+      const stockQty = product.stock_quantity !== null && product.stock_quantity !== undefined
+        ? product.stock_quantity
+        : undefined;
+      console.log('Setting stock quantity:', stockQty); // Debug stock quantity
+      setStockQuantity(stockQty);
+      setUnit(product.unit || "")
+      setImageUrl(product.image_url || undefined)
     } else {
       resetForm()
     }
@@ -84,7 +92,7 @@ export function ProductForm({
     setDescription("")
     setPrice("")
     setCategory("")
-    setStockQuantity("")
+    setStockQuantity(undefined)
     setImageFile(null)
     setImageUrl(undefined) // Set as undefined
     setUnit("") // Reset unit
@@ -106,7 +114,7 @@ export function ProductForm({
     if (isNaN(priceNum) || priceNum <= 0) {
       newErrors.price = "Valid price is required"
     }
-    const stockNum = parseInt(stockQuantity)
+    const stockNum = stockQuantity !== undefined ? stockQuantity : NaN
     if (isNaN(stockNum) || stockNum < 0) {
       newErrors.stock_quantity = "Valid stock quantity is required"
     }
@@ -123,17 +131,19 @@ export function ProductForm({
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
-    
+
     if (!validateForm()) return
+
+    console.log('Stock quantity before parsing:', stockQuantity);
 
     try {
       const productData: ProductWithImage = {
         name,
         description,
         price: parseFloat(price),
-        category_id: category || null, // Use category_id
+        category: category || null, // Use category
         unit,
-        stock_quantity: parseInt(stockQuantity),
+        stock_quantity: stockQuantity === undefined ? 0 : stockQuantity,
         image_url: imageUrl,
         imageFile: imageFile
       }
@@ -172,98 +182,135 @@ export function ProductForm({
           </SheetDescription>
         </SheetHeader>
         <form onSubmit={handleSubmit} className="space-y-6 mt-8">
+          <Table>
+            <TableBody>
+              <TableRow>
+                <TableCell className="w-1/3">
+                  <Label htmlFor="name">Product Name</Label>
+                </TableCell>
+                <TableCell>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    placeholder="Enter product name"
+                    className={errors.name ? "border-red-500" : ""}
+                  />
+                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
+                </TableCell>
+              </TableRow>
 
-          <div className="space-y-6"> {/* Standard ShadCN gap between elements */}
-            <div className="space-y-3">
-              <Label htmlFor="name">Product Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-                placeholder="Enter product name"
-                className={errors.name ? "border-red-500" : ""}
-              />
-              {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
-            </div>
+              <TableRow>
+                <TableCell>
+                  <Label htmlFor="category">Category</Label>
+                </TableCell>
+                <TableCell>
+                  {isLoadingCategories ? (
+                    <p>Loading categories...</p>
+                  ) : categoriesError ? (
+                    <p className="text-red-500 text-sm mt-1">{categoriesError}</p>
+                  ) : (
+                    <Select value={category} onValueChange={setCategory}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
+                </TableCell>
+              </TableRow>
 
-            <div className="space-y-3">
-              <Label htmlFor="category">Category</Label>
-              {isLoadingCategories ? (
-                <p>Loading categories...</p>
-              ) : categoriesError ? (
-                <p className="text-red-500 text-sm mt-1">{categoriesError}</p>
-              ) : (
-                <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger id="category" className={errors.category ? "border-red-500" : ""}>
-                    <SelectValue placeholder="Select category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories.map((cat: Category) => (
-                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              )}
-              {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
-            </div>
+              {/* Continue the same pattern for other fields */}
+              <TableRow>
+                <TableCell>
+                  <Label htmlFor="description">Description</Label>
+                </TableCell>
+                <TableCell>
+                  <Input
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Enter product description"
+                    className={errors.description ? "border-red-500" : ""}
+                  />
+                  {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+                </TableCell>
+              </TableRow>
 
-            <div className="space-y-3">
-              <Label htmlFor="description">Description</Label>
-              <Input
-                id="description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Enter product description"
-                className={errors.description ? "border-red-500" : ""}
-              />
-              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
-            </div>
+              {/* Add similar TableRows for price, stock quantity, and unit */}
+              <TableRow>
+                <TableCell>
+                  <Label htmlFor="price">Price</Label>
+                </TableCell>
+                <TableCell>
+                  <Input
+                    id="price"
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                    placeholder="Enter price"
+                    step="0.01"
+                    min="0"
+                    className={errors.price ? "border-red-500" : ""}
+                  />
+                  {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
+                </TableCell>
+              </TableRow>
 
-            <div className="space-y-3">
-              <Label htmlFor="price">Price</Label>
-              <Input
-                id="price"
-                type="number"
-                value={price}
-                onChange={(e) => setPrice(e.target.value)}
-                required
-                placeholder="Enter price"
-                step="0.01"
-                min="0"
-                className={errors.price ? "border-red-500" : ""}
-              />
-              {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price}</p>}
-            </div>
+              <TableRow>
+                <TableCell>
+                  <Label htmlFor="stock">Stock Quantity</Label>
+                </TableCell>
+                <TableCell>
+                  <Input
+                    id="stock"
+                    type="number"
+                    value={stockQuantity === undefined ? '' : stockQuantity.toString()}
+                    onChange={(e) => {
+                      const value = parseInt(e.target.value);
+                      console.log('Stock quantity changed:', value);
+                      setStockQuantity(isNaN(value) ? undefined : value);
+                    }}
+                    required
+                    placeholder="Enter stock quantity"
+                    min={0}
+                    className={errors.stock_quantity ? "border-red-500" : ""}
+                  />
+                  {errors.stock_quantity && <p className="text-red-500 text-sm mt-1">{errors.stock_quantity}</p>}
+                  {/* Debug display */}
+                  <p className="text-xs text-gray-500 mt-1">
+                    Raw value: {JSON.stringify(stockQuantity)}
+                  </p>
+                </TableCell>
+              </TableRow>
 
-            <div className="space-y-3">
-              <Label htmlFor="stock">Stock Quantity</Label>
-              <Input
-                id="stock"
-                type="number"
-                value={stockQuantity}
-                onChange={(e) => setStockQuantity(e.target.value)}
-                required
-                placeholder="Enter stock quantity"
-                min="0"
-                className={errors.stock_quantity ? "border-red-500" : ""}
-              />
-              {errors.stock_quantity && <p className="text-red-500 text-sm mt-1">{errors.stock_quantity}</p>}
-            </div>
-
-            <div className="space-y-3">
-              <Label htmlFor="unit">Unit</Label>
-              <Input
-                id="unit"
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
-                required
-                placeholder="Enter unit (e.g., kg, pcs)"
-                className={errors.unit ? "border-red-500" : ""}
-              />
-              {errors.unit && <p className="text-red-500 text-sm mt-1">{errors.unit}</p>}
-            </div>
-          </div>
+              <TableRow>
+                <TableCell>
+                  <Label htmlFor="unit">Unit</Label>
+                </TableCell>
+                <TableCell>
+                  <Input
+                    id="unit"
+                    value={unit}
+                    onChange={(e) => setUnit(e.target.value)}
+                    required
+                    placeholder="Enter unit (e.g., kg, pcs)"
+                    className={errors.unit ? "border-red-500" : ""}
+                  />
+                  {errors.unit && <p className="text-red-500 text-sm mt-1">{errors.unit}</p>}
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
 
           <div className="space-y-3">
             <Label>Product Image</Label>

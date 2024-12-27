@@ -1,7 +1,6 @@
 'use client';
 
-import { supabase } from '@/lib/supabase/client';
-import { Product, Category } from '@/types/product'; // Ensure correct import
+import { Product } from '@/types/product'; // Remove Category import
 import { useEffect, useState } from 'react';
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
@@ -34,8 +33,17 @@ export function useProducts(initialProducts?: Product[]) { // Make initialProduc
         .from("products")
         .select("*")
         .order("created_at", { ascending: false })
+      
       if (error) throw error
-      setProducts(data)
+      
+      // Transform the data - map category to category_id if needed
+      const transformedData = data?.map(product => ({
+        ...product,
+        // Keep the original category field
+        category: product.category || product.category_id || null
+      }))
+      
+      setProducts(transformedData)
     }
 
     if (!initialProducts) {

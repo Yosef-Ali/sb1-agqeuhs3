@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import {
   ColumnFiltersState,
   SortingState,
@@ -31,14 +31,13 @@ import { useProducts } from '@/hooks/use-products'  // Update import
 import { useToast } from '@/hooks/use-toast'
 import React from "react"
 import { useCategories } from '@/hooks/use-categories'
-import { Category } from '@/lib/supabase/types'
 
 interface ProductsTableProps {
   serverProducts: Product[]
 }
 
 export function ProductsTable({ serverProducts }: ProductsTableProps) {
-  
+
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
@@ -47,27 +46,25 @@ export function ProductsTable({ serverProducts }: ProductsTableProps) {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
-  const { 
-    products: fetchedProducts, 
-    isLoading, 
-    error, 
+  const {
+    products: fetchedProducts,
+    isLoading,
+    error,
     deleteProduct: deleteProductOp,
-    refreshProducts, 
+    refreshProducts,
   } = useProducts(serverProducts) // Pass serverProducts here
   const { toast } = useToast()
   const { categories, isLoading: isLoadingCategories, error: categoriesError } = useCategories()
-  
-  const getCategoryName = (category_id: string | null): string => {
-    const category = categories.find(cat => cat.id === category_id)
-    return category ? category.name : "Uncategorized"
-  }
+
 
   const products = serverProducts || fetchedProducts || []
 
-  const handleEdit = (product: Product) => {
+
+  // 4. Define handlers
+  const handleEdit = useCallback((product: Product) => {
     setSelectedProduct(product)
     setShowEditProduct(true)
-  }
+  }, []) // Empty dependency array since setState functions are stable
 
   const handleCloseEdit = () => {
     setShowEditProduct(false)
@@ -75,9 +72,9 @@ export function ProductsTable({ serverProducts }: ProductsTableProps) {
     refreshProducts()
   }
 
-  const handleDelete = (product: Product) => {
+  const handleDelete = useCallback((product: Product) => {
     setDeleteProduct(product)
-  }
+  }, [])
 
   const handleDeleteConfirm = async () => {
     if (!deleteProduct?.id) return
@@ -99,20 +96,19 @@ export function ProductsTable({ serverProducts }: ProductsTableProps) {
     }
   }
 
-  const handleImageClick = (imageUrl: string) => {
+  const handleImageClick = useCallback((imageUrl: string) => {
     setPreviewImage(imageUrl)
-  }
+  }, []) // Empty dependency array since setPreviewImage is stable
 
-  const handleCreateSuccess = () => {
-    refreshProducts()
-  }
-
-  const columns = createColumns({
+  
+  const columns = useMemo(() => createColumns({
     onEdit: handleEdit,
     onDelete: handleDelete,
-    onImageClick: handleImageClick
-  })
+    onImageClick: handleImageClick,
+    categories: categories || []
+  }), [categories, handleEdit, handleDelete, handleImageClick])
 
+  // 6. Create table
   const table = useReactTable({
     data: products,
     columns,
@@ -132,56 +128,66 @@ export function ProductsTable({ serverProducts }: ProductsTableProps) {
     },
   })
 
-  if (isLoading) return <TableLoading />
-  if (error) return <div>Error: {error}</div>
-
+  // 7. Render table
   return (
     <div className="space-y-4">
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
-                  </TableHead>
+      {
+        isLoading || isLoadingCategories ? (
+          <TableLoading />
+        ) : error ? (
+          <div>Error: {error}</div>
+        ) : categoriesError ? (
+          <div>Error loading categories: {categoriesError}</div>
+        ) : !categories?.length ? (
+          <div>No categories available</div>
+        ) : (
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                      </TableHead>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      No results.
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        )
+      }
       <OrdersTablePagination table={table} />
       <ProductModals
         showEditProduct={showEditProduct}
