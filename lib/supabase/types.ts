@@ -8,5 +8,6 @@ export type Product = Tables<'products'>
 export type Customer = Tables<'customers'>
 export type Order = Tables<'orders'>
 export type OrderItem = Tables<'order_items'>
+export type Category = Tables<'categories'>
 
 export type ProductWithDetails = Product

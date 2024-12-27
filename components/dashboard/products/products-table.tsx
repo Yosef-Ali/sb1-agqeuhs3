@@ -29,8 +29,15 @@ import { Sheet, SheetContent } from "@/components/ui/sheet" // Add this import
 import Image from "next/image"
 import { useProducts } from '@/hooks/use-products'  // Update import
 import { useToast } from '@/hooks/use-toast'
+import React from "react"
+import { useCategories } from '@/hooks/use-categories'
+import { Category } from '@/lib/supabase/types'
 
-export function ProductsTable() {
+interface ProductsTableProps {
+  serverProducts: Product[]
+}
+
+export function ProductsTable({ serverProducts }: ProductsTableProps) {
   
   const [sorting, setSorting] = useState<SortingState>([])
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
@@ -41,13 +48,21 @@ export function ProductsTable() {
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
   const { 
-    products, 
+    products: fetchedProducts, 
     isLoading, 
     error, 
     deleteProduct: deleteProductOp,
-    refreshProducts, // Add this line
-  } = useProducts()
+    refreshProducts, 
+  } = useProducts(serverProducts) // Pass serverProducts here
   const { toast } = useToast()
+  const { categories, isLoading: isLoadingCategories, error: categoriesError } = useCategories()
+  
+  const getCategoryName = (category_id: string | null): string => {
+    const category = categories.find(cat => cat.id === category_id)
+    return category ? category.name : "Uncategorized"
+  }
+
+  const products = serverProducts || fetchedProducts || []
 
   const handleEdit = (product: Product) => {
     setSelectedProduct(product)
@@ -92,7 +107,11 @@ export function ProductsTable() {
     refreshProducts()
   }
 
-  const columns = createColumns(handleEdit, handleDelete, handleImageClick)
+  const columns = createColumns({
+    onEdit: handleEdit,
+    onDelete: handleDelete,
+    onImageClick: handleImageClick
+  })
 
   const table = useReactTable({
     data: products,

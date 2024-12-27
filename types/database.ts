@@ -16,10 +16,12 @@ export interface Database {
           description: string | null
           price: number
           stock_quantity: number
-          category: string | null
+          category_id: string | null // Rename to category_id
+          unit: string | null         // Add unit field
           image_url: string | null
           organic: boolean
           created_at: string
+          status?: string
         }
         Insert: {
           id?: string
@@ -27,10 +29,12 @@ export interface Database {
           description?: string | null
           price: number
           stock_quantity?: number
-          category?: string | null
+          category_id?: string | null // Rename to category_id
+          unit?: string | null        // Add unit field
           image_url?: string | null
           organic?: boolean
           created_at?: string
+          status?: string
         }
         Update: {
           id?: string
@@ -38,10 +42,12 @@ export interface Database {
           description?: string | null
           price?: number
           stock_quantity?: number
-          category?: string | null
+          category_id?: string | null // Rename to category_id
+          unit?: string | null        // Add unit field
           image_url?: string | null
           organic?: boolean
           created_at?: string
+          status?: string
         }
       }
       customers: {
@@ -114,6 +120,25 @@ export interface Database {
           product_id?: string
           quantity?: number
           price_at_time?: number
+        }
+      }
+      categories: {
+        Row: {
+          id: string
+          name: string
+          created_at?: string
+          updated_at?: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          updated_at?: string
         }
       }
     }

@@ -15,11 +15,15 @@ const getStatusColor = (status: string) => {
   }
 }
 
-export const createColumns = (
-  onEdit: (product: Product) => void,
-  onDelete: (product: Product) => void,
-  onImageClick: (imageUrl: string) => void
-): ColumnDef<Product>[] => [
+export const createColumns = ({
+  onEdit,
+  onDelete,
+  onImageClick,
+}: {
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
+  onImageClick: (imageUrl: string) => void;
+}): ColumnDef<Product>[] => [
   {
     accessorKey: "image_url",
     header: "Image",

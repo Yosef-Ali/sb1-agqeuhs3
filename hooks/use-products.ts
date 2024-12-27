@@ -1,8 +1,9 @@
 'use client';
 
 import { supabase } from '@/lib/supabase/client';
-import { Product } from '@/types/product';
+import { Product, Category } from '@/types/product'; // Ensure correct import
 import { useEffect, useState } from 'react';
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 
 // Cache configuration
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -17,12 +18,31 @@ interface ImageUploadResponse {
 }
 
 export interface ProductWithImage extends Partial<Product> {
-  imageFile?: File | null;  // Update to allow null
-  status?: string;          // Add status property
+  imageFile?: File | null;
+  status?: string;
+  category_id?: string | null; // Rename to category_id and allow null
+  unit?: string | null;        // Add unit field
 }
 
-export function useProducts() {
-  const [products, setProducts] = useState<Product[]>([]);
+export function useProducts(initialProducts?: Product[]) { // Make initialProducts optional
+  const [products, setProducts] = useState(initialProducts)
+  const supabase = createClientComponentClient()
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false })
+      if (error) throw error
+      setProducts(data)
+    }
+
+    if (!initialProducts) {
+      fetchProducts()
+    }
+  }, [supabase, initialProducts])
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

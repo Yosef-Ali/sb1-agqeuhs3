@@ -23,7 +23,9 @@ import {
 } from "@/components/ui/select"
 import { Product } from "@/types/product" // Import Product type
 import { Button } from "@/components/ui/button"
-import { useProducts, ProductWithImage } from '@/hooks/use-products'  // Add ProductWithImage to import
+import { useProducts, ProductWithImage } from '@/hooks/use-products'
+import { useCategories } from '@/hooks/use-categories'
+import { Category } from '@/lib/supabase/types'  // Import Category from types
 
 interface ProductFormProps {
   open: boolean
@@ -40,6 +42,7 @@ interface FormErrors {
   price?: string;
   stock_quantity?: string;
   description?: string;
+  unit?: string;
 }
 
 export function ProductForm({
@@ -58,15 +61,18 @@ export function ProductForm({
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
-  const { createProduct, updateProduct, isLoading } = useProducts()
+  const [unit, setUnit] = useState("") // Add state for unit
+  const { createProduct, updateProduct, isLoading } = useProducts(undefined) // Pass undefined explicitly
+  const { categories, isLoading: isLoadingCategories, error: categoriesError } = useCategories()
 
   useEffect(() => {
     if (product) {
       setName(product.name || "")
       setDescription(product.description || "")
       setPrice(product.price?.toString() || "")
-      setCategory(product.category || "")
+      setCategory(product.category || "") // This should now be category_id
       setStockQuantity(product.stock_quantity?.toString() || "")
+      setUnit(product.unit || "") // Initialize unit
       setImageUrl(product.image_url || undefined) // Set as undefined
     } else {
       resetForm()
@@ -81,6 +87,7 @@ export function ProductForm({
     setStockQuantity("")
     setImageFile(null)
     setImageUrl(undefined) // Set as undefined
+    setUnit("") // Reset unit
 
     // Wait for state updates to complete
     await new Promise(resolve => setTimeout(resolve, 0))
@@ -88,21 +95,26 @@ export function ProductForm({
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
-    
+
     if (!name.trim()) {
       newErrors.name = "Name is required"
     }
-    if (!category.trim()) {
+    if (!category) {
       newErrors.category = "Category is required"
     }
-    if (!price || parseFloat(price) <= 0) {
+    const priceNum = parseFloat(price)
+    if (isNaN(priceNum) || priceNum <= 0) {
       newErrors.price = "Valid price is required"
     }
-    if (!stockQuantity || parseInt(stockQuantity) < 0) {
+    const stockNum = parseInt(stockQuantity)
+    if (isNaN(stockNum) || stockNum < 0) {
       newErrors.stock_quantity = "Valid stock quantity is required"
     }
     if (!description.trim()) {
       newErrors.description = "Description is required"
+    }
+    if (!unit.trim()) {
+      newErrors.unit = "Unit is required"
     }
 
     setErrors(newErrors)
@@ -119,7 +131,8 @@ export function ProductForm({
         name,
         description,
         price: parseFloat(price),
-        category,
+        category_id: category || null, // Use category_id
+        unit,
         stock_quantity: parseInt(stockQuantity),
         image_url: imageUrl,
         imageFile: imageFile
@@ -176,16 +189,22 @@ export function ProductForm({
 
             <div className="space-y-3">
               <Label htmlFor="category">Category</Label>
-              <Select value={category} onValueChange={setCategory}>
-                <SelectTrigger id="category" className={errors.category ? "border-red-500" : ""}>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="fruits">Fruits</SelectItem>
-                  <SelectItem value="vegetables">Vegetables</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-              </Select>
+              {isLoadingCategories ? (
+                <p>Loading categories...</p>
+              ) : categoriesError ? (
+                <p className="text-red-500 text-sm mt-1">{categoriesError}</p>
+              ) : (
+                <Select value={category} onValueChange={setCategory}>
+                  <SelectTrigger id="category" className={errors.category ? "border-red-500" : ""}>
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat: Category) => (
+                      <SelectItem key={cat.id} value={cat.id}>{cat.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               {errors.category && <p className="text-red-500 text-sm mt-1">{errors.category}</p>}
             </div>
 
@@ -230,6 +249,19 @@ export function ProductForm({
                 className={errors.stock_quantity ? "border-red-500" : ""}
               />
               {errors.stock_quantity && <p className="text-red-500 text-sm mt-1">{errors.stock_quantity}</p>}
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="unit">Unit</Label>
+              <Input
+                id="unit"
+                value={unit}
+                onChange={(e) => setUnit(e.target.value)}
+                required
+                placeholder="Enter unit (e.g., kg, pcs)"
+                className={errors.unit ? "border-red-500" : ""}
+              />
+              {errors.unit && <p className="text-red-500 text-sm mt-1">{errors.unit}</p>}
             </div>
           </div>
 
